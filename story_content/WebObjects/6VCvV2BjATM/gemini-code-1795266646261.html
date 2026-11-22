@@ -1,0 +1,441 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Tanya Jawab & Konsultasi SPLDV</title>
+  <script>
+    window.MathJax = {
+      tex: { inlineMath: [['$', '$'], ['\\(', '\\)']] }
+    };
+  </script>
+  <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js" async></script>
+  <style>
+    :root {
+      --bg-cream: #FFFDF5;
+      --card-white: #FFFFFF;
+      --yellow-primary: #FACC15;
+      --yellow-soft: #FEF9C3;
+      --yellow-border: #FDE047;
+      --brown-dark: #451A03;
+      --brown-medium: #78350F;
+      --brown-light: #92400E;
+      --shadow: 0 6px 18px rgba(69, 26, 3, 0.08);
+    }
+
+    * {
+      box-sizing: border-box;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    }
+
+    body {
+      margin: 0;
+      padding: 20px 14px;
+      background-color: var(--bg-cream);
+      color: var(--brown-dark);
+      line-height: 1.6;
+    }
+
+    .container {
+      max-width: 820px;
+      margin: 0 auto;
+      display: flex;
+      flex-direction: column;
+      gap: 24px;
+    }
+
+    .header-box {
+      background: linear-gradient(135deg, #FEF08A 0%, #FACC15 100%);
+      border: 2px solid var(--brown-medium);
+      border-radius: 18px;
+      padding: 20px 24px;
+      text-align: center;
+      box-shadow: var(--shadow);
+    }
+
+    .header-box h1 {
+      margin: 0 0 6px 0;
+      font-size: 1.5rem;
+      color: var(--brown-dark);
+    }
+
+    .header-box p {
+      margin: 0;
+      font-size: 0.95rem;
+      color: var(--brown-medium);
+      font-weight: 600;
+    }
+
+    .section-card {
+      background-color: var(--card-white);
+      border: 2px solid #E7E5E4;
+      border-top: 6px solid var(--brown-medium);
+      border-radius: 16px;
+      padding: 22px;
+      box-shadow: var(--shadow);
+    }
+
+    .section-title {
+      margin: 0 0 16px 0;
+      font-size: 1.2rem;
+      color: var(--brown-dark);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .faq-list {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .faq-item {
+      border: 1.5px solid var(--yellow-border);
+      border-radius: 12px;
+      overflow: hidden;
+      background-color: #FFFBEB;
+    }
+
+    .faq-question {
+      width: 100%;
+      background: none;
+      border: none;
+      padding: 14px 16px;
+      text-align: left;
+      font-size: 0.98rem;
+      font-weight: 700;
+      color: var(--brown-dark);
+      cursor: pointer;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .faq-question:hover {
+      background-color: var(--yellow-soft);
+    }
+
+    .faq-icon {
+      font-size: 1.2rem;
+      font-weight: bold;
+      color: var(--brown-medium);
+      transition: transform 0.25s ease;
+    }
+
+    .faq-item.active .faq-icon {
+      transform: rotate(45deg);
+    }
+
+    .faq-answer {
+      max-height: 0;
+      overflow: hidden;
+      background-color: var(--card-white);
+      padding: 0 16px;
+      font-size: 0.95rem;
+      color: #292524;
+      transition: max-height 0.3s ease, padding 0.3s ease;
+    }
+
+    .faq-item.active .faq-answer {
+      max-height: 500px;
+      padding: 14px 16px;
+      border-top: 1px dashed #FCD34D;
+    }
+
+    .form-group {
+      margin-bottom: 14px;
+    }
+
+    .form-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+    }
+
+    @media (max-width: 600px) {
+      .form-row {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    label {
+      display: block;
+      font-weight: 700;
+      margin-bottom: 5px;
+      font-size: 0.9rem;
+      color: var(--brown-dark);
+    }
+
+    input, select, textarea {
+      width: 100%;
+      padding: 10px 13px;
+      border: 1.5px solid #D6D3D1;
+      border-radius: 10px;
+      font-size: 0.95rem;
+      color: var(--brown-dark);
+      background-color: #FAFAF9;
+    }
+
+    input:focus, select:focus, textarea:focus {
+      outline: none;
+      border-color: var(--brown-medium);
+      background-color: #FFFFFF;
+      box-shadow: 0 0 0 3px rgba(250, 204, 21, 0.35);
+    }
+
+    textarea {
+      min-height: 105px;
+      resize: vertical;
+    }
+
+    .button-group {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .btn-submit {
+      width: 100%;
+      background-color: var(--brown-medium);
+      color: #FFFFFF;
+      border: none;
+      padding: 13px 18px;
+      font-size: 1rem;
+      font-weight: 700;
+      border-radius: 12px;
+      cursor: pointer;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .btn-submit:hover {
+      background-color: var(--brown-dark);
+    }
+
+    .btn-copy {
+      width: 100%;
+      background-color: var(--yellow-soft);
+      color: var(--brown-dark);
+      border: 1.5px solid var(--brown-medium);
+      padding: 10px 16px;
+      font-size: 0.92rem;
+      font-weight: 700;
+      border-radius: 12px;
+      cursor: pointer;
+    }
+
+    .btn-copy:hover {
+      background-color: var(--yellow-primary);
+    }
+
+    .status-toast {
+      display: none;
+      margin-top: 10px;
+      padding: 10px 14px;
+      border-radius: 10px;
+      background-color: #DCFCE7;
+      border: 1.5px solid #16A34A;
+      color: #14532D;
+      font-size: 0.9rem;
+      font-weight: 600;
+      text-align: center;
+    }
+
+    .info-note {
+      margin-top: 10px;
+      font-size: 0.84rem;
+      color: var(--brown-light);
+      text-align: center;
+    }
+  </style>
+</head>
+<body>
+
+<div class="container">
+  <div class="header-box">
+    <h1>Pojok Tanya Jawab Materi SPLDV</h1>
+    <p>Sistem Persamaan Linear Dua Variabel — Kelas VIII SMP</p>
+  </div>
+
+  <!-- Bagian 1: Tanya Jawab Umum (FAQ) -->
+  <section class="section-card">
+    <h2 class="section-title">💡 Pertanyaan yang Sering Ditanyakan Siswa</h2>
+    <div class="faq-list">
+
+      <div class="faq-item">
+        <button class="faq-question" onclick="toggleFaq(this)">
+          <span>1. Apa bedanya PLDV dengan SPLDV?</span>
+          <span class="faq-icon">+</span>
+        </button>
+        <div class="faq-answer">
+          <strong>PLDV (Persamaan Linear Dua Variabel)</strong> hanya terdiri dari <strong>satu persamaan</strong> saja (contoh: $2x + 3y = 12$), sehingga memiliki banyak sekali pasangan penyelesaian.<br><br>
+          Sedangkan <strong>SPLDV (Sistem Persamaan Linear Dua Variabel)</strong> terdiri dari <strong>dua atau lebih PLDV</strong> yang saling berhubungan dan dicari satu pasangan nilai $(x, y)$ yang memenuhi kedua persamaan tersebut secara bersamaan.
+        </div>
+      </div>
+
+      <div class="faq-item">
+        <button class="faq-question" onclick="toggleFaq(this)">
+          <span>2. Kapan sebaiknya memakai metode Eliminasi vs Substitusi?</span>
+          <span class="faq-icon">+</span>
+        </button>
+        <div class="faq-answer">
+          <ul>
+            <li><strong>Gunakan Substitusi</strong> jika salah satu persamaan sudah berbentuk $x = \dots$ atau $y = \dots$, atau ada variabel yang koefisiennya $1$ (misalnya $x + 2y = 10$).</li>
+            <li><strong>Gunakan Eliminasi</strong> jika semua variabel memiliki koefisien selain $1$ (misalnya $2x + 3y = 11$ dan $3x + 2y = 13$).</li>
+            <li><strong>Metode Gabungan (Eliminasi + Substitusi)</strong> adalah cara paling cepat: eliminasi dulu untuk menemukan satu variabel, lalu substitusikan hasilnya ke salah satu persamaan.</li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="faq-item">
+        <button class="faq-question" onclick="toggleFaq(this)">
+          <span>3. Saat metode eliminasi, kapan harus ditambah (+) dan kapan dikurang (-)?</span>
+          <span class="faq-icon">+</span>
+        </button>
+        <div class="faq-answer">
+          Perhatikan tanda pada variabel yang koefisiennya sudah sama:<br>
+          • Jika tandanya <strong>SAMA</strong> (sama-sama positif $+$ atau sama-sama negatif $-$), maka kedua persamaan <strong>DIKURANG ($-$)</strong>.<br>
+          • Jika tandanya <strong>BERBEDA</strong> (satu positif $+$ dan satu negatif $-$), maka kedua persamaan <strong>DITAMBAH ($+$)</strong>.
+        </div>
+      </div>
+
+      <div class="faq-item">
+        <button class="faq-question" onclick="toggleFaq(this)">
+          <span>4. Bagaimana cara mengubah soal cerita menjadi model matematika SPLDV?</span>
+          <span class="faq-icon">+</span>
+        </button>
+        <div class="faq-answer">
+          Ikuti 3 langkah mudah berikut:<br>
+          1. <strong>Tentukan dua hal yang belum diketahui</strong> harganya/nilainya, lalu misalkan sebagai $x$ dan $y$ (misal: $x =$ harga 1 nasi goreng, $y =$ harga 1 jus).<br>
+          2. <strong>Ubah setiap kalimat informasi</strong> menjadi persamaan. Contoh: <em>"2 nasi goreng dan 3 jus seharga Rp35.000"</em> menjadi $2x + 3y = 35.000$.<br>
+          3. Selesaikan kedua persamaan tersebut untuk mendapatkan nilai $x$ dan $y$.
+        </div>
+      </div>
+
+      <div class="faq-item">
+        <button class="faq-question" onclick="toggleFaq(this)">
+          <span>5. Bagaimana cara mengecek apakah jawaban $(x, y)$ saya sudah benar?</span>
+          <span class="faq-icon">+</span>
+        </button>
+        <div class="faq-answer">
+          Masukkan kembali nilai $x$ dan $y$ yang kamu temukan ke dalam <strong>kedua persamaan awal</strong>. Jika ruas kiri menghasilkan angka yang sama persis dengan ruas kanan pada kedua persamaan, maka jawabanmu dipastikan 100% benar!
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- Bagian 2: Form Pertanyaan ke Email Guru -->
+  <section class="section-card">
+    <h2 class="section-title">✉️ Punya Pertanyaan Lain? Tanya Langsung ke Ibu Guru</h2>
+    <form id="studentQuestionForm" onsubmit="kirimKeGmail(event)">
+      <div class="form-row">
+        <div class="form-group">
+          <label for="namaSiswa">Nama Lengkap Siswa</label>
+          <input type="text" id="namaSiswa" placeholder="Contoh: Ahmad Fauzan" required />
+        </div>
+        <div class="form-group">
+          <label for="kelasSiswa">Kelas</label>
+          <input type="text" id="kelasSiswa" placeholder="Contoh: VIII-A" required />
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label for="subtopik">Bagian Materi yang Ditanyakan</label>
+        <select id="subtopik">
+          <option value="Konsep Dasar & Model Matematika SPLDV">Konsep Dasar & Model Matematika SPLDV</option>
+          <option value="Metode Grafik">Metode Grafik</option>
+          <option value="Metode Substitusi">Metode Substitusi</option>
+          <option value="Metode Eliminasi">Metode Eliminasi</option>
+          <option value="Metode Gabungan">Metode Gabungan</option>
+          <option value="Soal Cerita SPLDV">Soal Cerita SPLDV</option>
+        </select>
+      </div>
+
+      <div class="form-group">
+        <label for="isiPertanyaan">Tulis Pertanyaanmu di Sini</label>
+        <textarea id="isiPertanyaan" placeholder="Tuliskan bagian mana yang belum kamu pahami atau soal yang membuatmu bingung..." required></textarea>
+      </div>
+
+      <div class="button-group">
+        <button type="submit" class="btn-submit">
+          <span>Kirim Lewat Gmail ke Ibu Yulistia</span> 📩
+        </button>
+        <button type="button" class="btn-copy" onclick="salinPertanyaan()">
+          📋 Salin Pertanyaan & Alamat Email (Jika Tidak Login Gmail)
+        </button>
+      </div>
+
+      <div id="statusToast" class="status-toast"></div>
+
+      <p class="info-note">
+        Alamat tujuan otomatis: <strong>yulistiamohamad123@gmail.com</strong>
+      </p>
+    </form>
+  </section>
+</div>
+
+<script>
+  function toggleFaq(button) {
+    button.parentElement.classList.toggle('active');
+  }
+
+  function buatFormatPesan() {
+    const nama = document.getElementById("namaSiswa").value.trim() || "(Belum diisi)";
+    const kelas = document.getElementById("kelasSiswa").value.trim() || "(Belum diisi)";
+    const subtopik = document.getElementById("subtopik").value;
+    const pertanyaan = document.getElementById("isiPertanyaan").value.trim() || "(Belum diisi)";
+
+    const subjek = `Pertanyaan Siswa SPLDV - ${nama} (${kelas})`;
+    const isiEmail =
+`Assalamu'alaikum / Selamat pagi Ibu Yulistia,
+
+Perkenalkan, saya:
+Nama  : ${nama}
+Kelas : ${kelas}
+Topik : ${subtopik}
+
+Saya ingin bertanya mengenai materi SPLDV:
+"${pertanyaan}"
+
+Terima kasih atas bimbingannya, Bu.`;
+
+    return { subjek, isiEmail };
+  }
+
+  function kirimKeGmail(event) {
+    event.preventDefault();
+    const tujuanEmail = "yulistiamohamad123@gmail.com";
+    const { subjek, isiEmail } = buatFormatPesan();
+
+    // Membuka tab baru langsung ke Gmail Compose (aman untuk Web Object Storyline)
+    const gmailUrl = `https://mail.google.com/mail/?view=cm&fs=1&to=${encodeURIComponent(tujuanEmail)}&su=${encodeURIComponent(subjek)}&body=${encodeURIComponent(isiEmail)}`;
+    window.open(gmailUrl, '_blank', 'noopener,noreferrer');
+
+    tampilkanNotifikasi("✅ Halaman Gmail dibuka di tab baru! Silakan klik tombol 'Kirim' di Gmail.");
+  }
+
+  function salinPertanyaan() {
+    const { subjek, isiEmail } = buatFormatPesan();
+    const teksLengkap = `Tujuan Email: yulistiamohamad123@gmail.com\nSubjek: ${subjek}\n\n${isiEmail}`;
+
+    navigator.clipboard.writeText(teksLengkap).then(() => {
+      tampilkanNotifikasi("📋 Pertanyaan & email Ibu Yulistia berhasil disalin! Tinggal tempel (Paste) di aplikasi email/WA.");
+    }).catch(() => {
+      tampilkanNotifikasi("⚠️ Gagal menyalin otomatis, silakan blok dan salin teks pertanyaan secara manual.");
+    });
+  }
+
+  function tampilkanNotifikasi(pesan) {
+    const toast = document.getElementById("statusToast");
+    toast.textContent = pesan;
+    toast.style.display = "block";
+  }
+</script>
+
+</body>
+</html>

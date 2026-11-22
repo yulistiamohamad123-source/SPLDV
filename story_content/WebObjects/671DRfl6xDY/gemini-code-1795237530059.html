@@ -1,0 +1,1219 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Media Pembelajaran Interaktif SPLDV</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    window.MathJax = {
+      tex: {
+        inlineMath: [['\\(', '\\)']],
+        displayMath: [['$$', '$$'], ['\\[', '\\]']]
+      },
+      svg: { fontCache: 'global' }
+    };
+  </script>
+  <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-svg.js"></script>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap');
+
+    body {
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      background: linear-gradient(160deg, #31157A 0%, #461FA3 55%, #5828C2 100%);
+      min-height: 100vh;
+      color: #1E1B4B;
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* Gaya variabel inline agar selalu sejajar dalam kalimat dan tidak turun baris */
+    .math-var {
+      font-family: 'Times New Roman', Georgia, serif;
+      font-style: italic;
+      font-weight: 700;
+      font-size: 1.08em;
+      color: #31157A;
+      display: inline;
+      white-space: nowrap;
+    }
+
+    .math-num {
+      font-weight: 700;
+      color: #31157A;
+      display: inline;
+      white-space: nowrap;
+    }
+
+    .nav-card {
+      background: #EDE9FE;
+      border: 2px solid rgba(255, 255, 255, 0.45);
+      transition: transform 0.16s ease, box-shadow 0.16s ease, background-color 0.16s ease;
+    }
+
+    .nav-card:hover {
+      transform: translateY(-3px);
+      background: #F5F3FF;
+      box-shadow: 0 12px 24px rgba(18, 7, 56, 0.35);
+    }
+
+    .nav-card.active {
+      background: #FFFFFF;
+      border-color: #FDE047;
+      box-shadow: 0 12px 26px rgba(18, 7, 56, 0.45);
+      transform: translateY(-2px);
+    }
+
+    .panel-card {
+      background: #FFFFFF;
+      border-radius: 24px;
+      box-shadow: 0 18px 40px rgba(20, 8, 61, 0.25);
+    }
+
+    .math-box {
+      background: #FFFFFF;
+      border: 1.5px solid #DDD6FE;
+      border-left: 5px solid #4C24A8;
+      border-radius: 14px;
+      padding: 14px 18px;
+      overflow-x: auto;
+    }
+
+    .step-card {
+      background: #FFFFFF;
+      border: 1.5px solid #E9D5FF;
+      border-radius: 16px;
+      padding: 16px 20px;
+      box-shadow: 0 4px 12px rgba(76, 36, 168, 0.05);
+    }
+
+    canvas#graphCanvas {
+      background: #FAF8FF;
+      border: 2px solid #DDD6FE;
+      border-radius: 16px;
+      cursor: crosshair;
+      max-width: 100%;
+      height: auto;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Header & Navigasi Kartu Utama -->
+  <header class="w-full max-w-6xl mx-auto pt-8 pb-6 px-4 sm:px-6">
+    <div class="text-center text-white space-y-2 mb-7">
+      <div class="text-xs sm:text-sm font-bold tracking-[0.22em] uppercase text-purple-200">
+        ✦ &nbsp; MEDIA PEMBELAJARAN &nbsp; ✦
+      </div>
+      <h1 class="text-3xl sm:text-5xl font-extrabold tracking-tight drop-shadow-sm">
+        SPLDV Interaktif
+      </h1>
+      <div class="pt-1">
+        <span class="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-white/15 border border-white/25 text-xs sm:text-sm font-semibold text-purple-100 backdrop-blur-sm">
+          <span>✦</span> Sistem Persamaan Linear Dua Variabel
+        </span>
+      </div>
+    </div>
+
+    <!-- 4 Kartu Menu Utama (Klik untuk membuka halaman masing-masing) -->
+    <nav aria-label="Menu Utama" class="grid grid-cols-2 lg:grid-cols-4 gap-3.5 sm:gap-4">
+      <button id="card-tujuan" onclick="selectSection('tujuan')" class="nav-card active text-left p-4 sm:p-5 rounded-2xl">
+        <div class="w-9 h-9 rounded-xl bg-purple-100 flex items-center justify-center text-xl mb-3">🎯</div>
+        <div class="font-extrabold text-base sm:text-lg text-[#1E1B4B]">Tujuan</div>
+        <div class="text-xs sm:text-sm text-slate-600 mt-0.5">Apa yang akan dipelajari</div>
+      </button>
+
+      <button id="card-kasus" onclick="selectSection('kasus')" class="nav-card text-left p-4 sm:p-5 rounded-2xl">
+        <div class="w-9 h-9 rounded-xl bg-rose-100 flex items-center justify-center text-xl mb-3">🥤</div>
+        <div class="font-extrabold text-base sm:text-lg text-[#1E1B4B]">Kasus</div>
+        <div class="text-xs sm:text-sm text-slate-600 mt-0.5">Masalah sehari-hari</div>
+      </button>
+
+      <button id="card-eksplorasi" onclick="selectSection('eksplorasi')" class="nav-card text-left p-4 sm:p-5 rounded-2xl">
+        <div class="w-9 h-9 rounded-xl bg-indigo-100 flex items-center justify-center text-xl mb-3">📈</div>
+        <div class="font-extrabold text-base sm:text-lg text-[#1E1B4B]">Eksplorasi</div>
+        <div class="text-xs sm:text-sm text-slate-600 mt-0.5">Ubah koefisien & grafik</div>
+      </button>
+
+      <button id="card-metode" onclick="selectSection('metode')" class="nav-card text-left p-4 sm:p-5 rounded-2xl">
+        <div class="w-9 h-9 rounded-xl bg-violet-100 flex items-center justify-center text-xl mb-3">📘</div>
+        <div class="font-extrabold text-base sm:text-lg text-[#1E1B4B]">Metode</div>
+        <div class="text-xs sm:text-sm text-slate-600 mt-0.5">4 cara penyelesaian</div>
+      </button>
+    </nav>
+  </header>
+
+  <!-- Konten Dinamis (Hanya bagian yang diklik yang tampil) -->
+  <main class="w-full max-w-6xl mx-auto px-4 sm:px-6 flex-1">
+
+    <!-- PANEL 1: TUJUAN PEMBELAJARAN -->
+    <section id="sec-tujuan" class="panel-card p-6 sm:p-8">
+      <div class="flex items-center gap-3.5 mb-2">
+        <div class="w-11 h-11 rounded-2xl bg-purple-100 flex items-center justify-center text-2xl">🎯</div>
+        <div>
+          <h2 class="text-2xl sm:text-3xl font-extrabold text-[#1E1B4B]">Tujuan Pembelajaran</h2>
+        </div>
+      </div>
+      <p class="text-sm sm:text-base font-medium text-slate-600 mb-5">
+        Setelah belajar, kamu akan mampu:
+      </p>
+
+      <div class="space-y-3">
+        <div class="flex items-start gap-3.5 p-4 rounded-2xl bg-purple-50/80 border border-purple-200/80">
+          <span class="w-7 h-7 shrink-0 rounded-full bg-[#4C24A8] text-white text-sm font-bold flex items-center justify-center mt-0.5">1</span>
+          <p class="text-sm sm:text-base font-semibold text-slate-800">
+            Membedakan variabel dan persamaan dari masalah sehari-hari.
+          </p>
+        </div>
+        <div class="flex items-start gap-3.5 p-4 rounded-2xl bg-purple-50/80 border border-purple-200/80">
+          <span class="w-7 h-7 shrink-0 rounded-full bg-[#4C24A8] text-white text-sm font-bold flex items-center justify-center mt-0.5">2</span>
+          <p class="text-sm sm:text-base font-semibold text-slate-800">
+            Memahami konsep Sistem Persamaan Linear Dua Variabel.
+          </p>
+        </div>
+        <div class="flex items-start gap-3.5 p-4 rounded-2xl bg-purple-50/80 border border-purple-200/80">
+          <span class="w-7 h-7 shrink-0 rounded-full bg-[#4C24A8] text-white text-sm font-bold flex items-center justify-center mt-0.5">3</span>
+          <p class="text-sm sm:text-base font-semibold text-slate-800">
+            Membuat model matematika dari masalah kontekstual.
+          </p>
+        </div>
+        <div class="flex items-start gap-3.5 p-4 rounded-2xl bg-purple-50/80 border border-purple-200/80">
+          <span class="w-7 h-7 shrink-0 rounded-full bg-[#4C24A8] text-white text-sm font-bold flex items-center justify-center mt-0.5">4</span>
+          <p class="text-sm sm:text-base font-semibold text-slate-800">
+            Menentukan penyelesaian SPLDV dengan substitusi, eliminasi dan grafik.
+          </p>
+        </div>
+        <div class="flex items-start gap-3.5 p-4 rounded-2xl bg-purple-50/80 border border-purple-200/80">
+          <span class="w-7 h-7 shrink-0 rounded-full bg-[#4C24A8] text-white text-sm font-bold flex items-center justify-center mt-0.5">5</span>
+          <p class="text-sm sm:text-base font-semibold text-slate-800">
+            Menggunakan SPLDV untuk menyelesaikan masalah dalam kehidupan sehari-hari.
+          </p>
+        </div>
+      </div>
+
+      <div class="mt-6 flex justify-end">
+        <button onclick="selectSection('kasus')" class="px-5 py-2.5 rounded-xl bg-[#4C24A8] hover:bg-[#3B1B87] text-white text-sm font-bold transition">
+          Lanjut ke Kasus →
+        </button>
+      </div>
+    </section>
+
+    <!-- PANEL 2: KASUS MASALAH SEHARI-HARI -->
+    <section id="sec-kasus" class="panel-card p-6 sm:p-8 space-y-6 hidden">
+      <div class="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4 border-b border-purple-100 pb-4">
+        <div class="flex items-center gap-3.5">
+          <div class="w-11 h-11 rounded-2xl bg-rose-100 flex items-center justify-center text-2xl">🥤</div>
+          <div>
+            <span class="text-xs font-bold uppercase tracking-wider text-[#5B2CC4]">Pemodelan Matematika</span>
+            <h2 class="text-2xl sm:text-3xl font-extrabold text-[#1E1B4B]">Kasus Masalah Sehari-hari</h2>
+          </div>
+        </div>
+        <div class="flex flex-wrap gap-2" id="presetButtonsKasus"></div>
+      </div>
+
+      <div class="p-5 sm:p-6 rounded-2xl bg-purple-50 border border-purple-200 space-y-4">
+        <div class="text-xs font-extrabold uppercase tracking-wider text-[#4C24A8]">Cerita Kontekstual</div>
+        <p id="storyTextKasus" class="text-sm sm:text-base font-medium text-slate-800 leading-relaxed"></p>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4 items-stretch pt-1">
+          <div class="p-4 rounded-xl bg-white border border-purple-200 space-y-2">
+            <div class="text-xs font-bold uppercase tracking-wider text-slate-500">1. Identifikasi Variabel</div>
+            <div id="varLegendKasus" class="space-y-2 text-sm sm:text-base font-semibold text-slate-800 leading-relaxed"></div>
+          </div>
+
+          <div class="p-4 rounded-xl bg-white border border-purple-200 space-y-2">
+            <div class="text-xs font-bold uppercase tracking-wider text-slate-500">2. Model Matematika SPLDV</div>
+            <div id="modelPreviewKasus" class="text-base sm:text-lg text-[#1E1B4B] py-1"></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="flex flex-wrap items-center justify-between gap-3 pt-2">
+        <button onclick="selectSection('tujuan')" class="px-4 py-2.5 rounded-xl bg-purple-100 hover:bg-purple-200 text-[#3B1D8A] text-sm font-bold transition">
+          ← Kembali ke Tujuan
+        </button>
+        <div class="flex flex-wrap gap-2">
+          <button onclick="selectSection('eksplorasi')" class="px-5 py-2.5 rounded-xl bg-indigo-100 hover:bg-indigo-200 text-[#31157A] text-sm font-bold transition">
+            Eksplorasi Grafik →
+          </button>
+          <button onclick="selectSection('metode')" class="px-5 py-2.5 rounded-xl bg-[#4C24A8] hover:bg-[#3B1B87] text-white text-sm font-bold transition">
+            Lihat 4 Metode Penyelesaian →
+          </button>
+        </div>
+      </div>
+    </section>
+
+    <!-- PANEL 3: EKSPLORASI SOAL & GRAFIK -->
+    <section id="sec-eksplorasi" class="panel-card p-6 sm:p-8 space-y-6 hidden">
+      <div class="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4 border-b border-purple-100 pb-4">
+        <div class="flex items-center gap-3.5">
+          <div class="w-11 h-11 rounded-2xl bg-indigo-100 flex items-center justify-center text-2xl">📈</div>
+          <div>
+            <span class="text-xs font-bold uppercase tracking-wider text-[#5B2CC4]">Simulasi Interaktif</span>
+            <h2 class="text-2xl sm:text-3xl font-extrabold text-[#1E1B4B]">Eksplorasi Koefisien & Grafik</h2>
+          </div>
+        </div>
+        <div class="flex flex-wrap gap-2" id="presetButtonsEksplorasi"></div>
+      </div>
+
+      <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
+        <!-- Kolom Kiri: Input Koefisien -->
+        <div class="lg:col-span-5 space-y-4">
+          <div class="p-5 rounded-2xl border border-purple-200 bg-white space-y-4">
+            <div class="flex items-center justify-between">
+              <h3 class="font-bold text-sm sm:text-base text-[#1E1B4B]">
+                Ubah Koefisien Persamaan
+              </h3>
+              <button onclick="resetCurrentPreset()" class="text-xs font-bold text-[#5B2CC4] hover:underline">Reset Soal</button>
+            </div>
+
+            <div class="p-3.5 rounded-xl bg-rose-50/70 border border-rose-200 space-y-2">
+              <div class="text-xs font-extrabold text-rose-700">Persamaan (1) — Garis Merah</div>
+              <div class="flex items-center gap-2 text-base font-bold">
+                <input id="a1" type="number" step="any" class="w-16 px-2 py-1.5 rounded-lg border border-rose-300 bg-white text-center font-bold" />
+                <span class="math-var">x</span>
+                <span>+</span>
+                <input id="b1" type="number" step="any" class="w-16 px-2 py-1.5 rounded-lg border border-rose-300 bg-white text-center font-bold" />
+                <span class="math-var">y</span>
+                <span>=</span>
+                <input id="c1" type="number" step="any" class="w-20 px-2 py-1.5 rounded-lg border border-rose-300 bg-white text-center font-bold" />
+              </div>
+            </div>
+
+            <div class="p-3.5 rounded-xl bg-blue-50/70 border border-blue-200 space-y-2">
+              <div class="text-xs font-extrabold text-blue-700">Persamaan (2) — Garis Biru</div>
+              <div class="flex items-center gap-2 text-base font-bold">
+                <input id="a2" type="number" step="any" class="w-16 px-2 py-1.5 rounded-lg border border-blue-300 bg-white text-center font-bold" />
+                <span class="math-var">x</span>
+                <span>+</span>
+                <input id="b2" type="number" step="any" class="w-16 px-2 py-1.5 rounded-lg border border-blue-300 bg-white text-center font-bold" />
+                <span class="math-var">y</span>
+                <span>=</span>
+                <input id="c2" type="number" step="any" class="w-20 px-2 py-1.5 rounded-lg border border-blue-300 bg-white text-center font-bold" />
+              </div>
+            </div>
+
+            <button onclick="updateExploration(true)" class="w-full py-2.5 rounded-xl bg-[#4C24A8] hover:bg-[#3B1B87] text-white font-bold text-sm transition">
+              Terapkan & Perbarui Grafik
+            </button>
+          </div>
+
+          <div id="solutionBanner" class="p-4 rounded-2xl bg-indigo-50 border border-indigo-200"></div>
+        </div>
+
+        <!-- Kolom Kanan: Canvas Grafik -->
+        <div class="lg:col-span-7 space-y-2.5">
+          <div class="flex flex-wrap items-center justify-between gap-2">
+            <div class="flex items-center gap-3 text-xs font-bold text-slate-700">
+              <span class="inline-flex items-center gap-1.5">
+                <span class="w-3.5 h-1 bg-[#DC2626] rounded inline-block"></span> Garis (1)
+              </span>
+              <span class="inline-flex items-center gap-1.5">
+                <span class="w-3.5 h-1 bg-[#2563EB] rounded inline-block"></span> Garis (2)
+              </span>
+              <span class="inline-flex items-center gap-1.5">
+                <span class="w-3 h-3 rounded-full bg-[#16A34A] inline-block"></span> Titik Potong
+              </span>
+            </div>
+            <div class="flex items-center gap-1.5">
+              <button onclick="adjustScale(0.8)" class="px-2.5 py-1 rounded-lg bg-purple-100 hover:bg-purple-200 text-xs font-bold text-[#3B1D8A]">− Skala</button>
+              <button onclick="adjustScale(1.25)" class="px-2.5 py-1 rounded-lg bg-purple-100 hover:bg-purple-200 text-xs font-bold text-[#3B1D8A]">+ Skala</button>
+              <button onclick="autoFitGraph()" class="px-2.5 py-1 rounded-lg bg-[#4C24A8] text-white text-xs font-bold">Pas Titik</button>
+            </div>
+          </div>
+
+          <canvas id="graphCanvas" width="580" height="400"></canvas>
+
+          <div class="text-xs text-slate-600 flex flex-wrap justify-between gap-2 bg-purple-50/70 px-3.5 py-2 rounded-xl border border-purple-100">
+            <span>Arahkan kursor pada bidang koordinat untuk membaca titik (<span class="math-var">x</span>, <span class="math-var">y</span>).</span>
+            <span id="cursorCoord" class="font-bold text-[#3B1D8A]">(x, y)</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="flex flex-wrap items-center justify-between gap-3 pt-2">
+        <button onclick="selectSection('kasus')" class="px-4 py-2.5 rounded-xl bg-purple-100 hover:bg-purple-200 text-[#3B1D8A] text-sm font-bold transition">
+          ← Kembali ke Kasus
+        </button>
+        <button onclick="selectSection('metode')" class="px-5 py-2.5 rounded-xl bg-[#4C24A8] hover:bg-[#3B1B87] text-white text-sm font-bold transition">
+          Lanjut ke 4 Metode Penyelesaian →
+        </button>
+      </div>
+    </section>
+
+    <!-- PANEL 4: 4 METODE PENYELESAIAN -->
+    <section id="sec-metode" class="panel-card p-6 sm:p-8 space-y-5 hidden">
+      <div class="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-3 border-b border-purple-100 pb-4">
+        <div class="flex items-center gap-3.5">
+          <div class="w-11 h-11 rounded-2xl bg-violet-100 flex items-center justify-center text-2xl">📘</div>
+          <div>
+            <span class="text-xs font-bold uppercase tracking-wider text-[#5B2CC4]">Langkah Penyelesaian Sistematis</span>
+            <h2 class="text-2xl sm:text-3xl font-extrabold text-[#1E1B4B]">4 Metode Penyelesaian SPLDV</h2>
+          </div>
+        </div>
+
+        <!-- 4 Tab Metode: Eliminasi, Substitusi, Grafik, Campuran -->
+        <div class="flex flex-wrap gap-2">
+          <button id="tab-eliminasi" onclick="switchMethodTab('eliminasi')" class="px-4 py-2 rounded-xl bg-[#4C24A8] text-white text-xs sm:text-sm font-bold transition">
+            1. Eliminasi
+          </button>
+          <button id="tab-substitusi" onclick="switchMethodTab('substitusi')" class="px-4 py-2 rounded-xl bg-purple-100 text-[#3B1D8A] text-xs sm:text-sm font-bold transition">
+            2. Substitusi
+          </button>
+          <button id="tab-grafik" onclick="switchMethodTab('grafik')" class="px-4 py-2 rounded-xl bg-purple-100 text-[#3B1D8A] text-xs sm:text-sm font-bold transition">
+            3. Grafik
+          </button>
+          <button id="tab-campuran" onclick="switchMethodTab('campuran')" class="px-4 py-2 rounded-xl bg-purple-100 text-[#3B1D8A] text-xs sm:text-sm font-bold transition">
+            4. Campuran
+          </button>
+        </div>
+      </div>
+
+      <!-- Ringkasan Sistem Persamaan Aktif -->
+      <div id="activeSystemSummary" class="p-4 rounded-2xl bg-indigo-50/70 border border-indigo-200 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+        <div id="activeSystemEqText" class="text-sm sm:text-base font-bold text-[#1E1B4B]"></div>
+        <button onclick="selectSection('eksplorasi')" class="self-start sm:self-auto px-3.5 py-1.5 rounded-xl bg-white border border-indigo-300 hover:bg-indigo-100 text-xs font-bold text-[#3B1D8A]">
+          ✎ Ubah Angka Soal
+        </button>
+      </div>
+
+      <!-- Kontrol Interaktif Langkah Demi Langkah -->
+      <div class="flex flex-wrap items-center justify-between gap-3 bg-purple-50 px-4 py-3 rounded-2xl border border-purple-200">
+        <div class="text-xs sm:text-sm font-semibold text-slate-700" id="stepIndicatorText">
+          Menampilkan semua langkah penyelesaian
+        </div>
+        <div class="flex flex-wrap items-center gap-2">
+          <button onclick="startStepByStep()" class="px-3.5 py-1.5 rounded-xl bg-white border border-purple-300 hover:bg-purple-100 text-xs font-bold text-[#3B1D8A]">
+            Mulai Bertahap (Langkah 1)
+          </button>
+          <button id="btnNextStep" onclick="nextStep()" class="px-3.5 py-1.5 rounded-xl bg-[#4C24A8] hover:bg-[#3B1B87] text-white text-xs font-bold disabled:opacity-40" disabled>
+            Langkah Berikutnya →
+          </button>
+          <button onclick="showAllSteps()" class="px-3.5 py-1.5 rounded-xl bg-purple-200 hover:bg-purple-300 text-xs font-bold text-[#1E1B4B]">
+            Tampilkan Semua
+          </button>
+        </div>
+      </div>
+
+      <!-- Kontainer Langkah Matematika Tersusun Rapi -->
+      <div id="methodStepsBox" class="p-5 sm:p-6 rounded-2xl bg-purple-50/60 border border-purple-200 space-y-4 text-slate-800"></div>
+
+      <div class="flex justify-start pt-2">
+        <button onclick="selectSection('eksplorasi')" class="px-4 py-2.5 rounded-xl bg-purple-100 hover:bg-purple-200 text-[#3B1D8A] text-sm font-bold transition">
+          ← Kembali ke Eksplorasi & Grafik
+        </button>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- Footer Identitas Pengembang -->
+  <footer class="w-full max-w-6xl mx-auto px-4 sm:px-6 pt-8 pb-6 mt-4">
+    <div class="rounded-2xl bg-white/10 border border-white/20 backdrop-blur-sm px-5 py-3.5 text-center text-purple-100 text-xs sm:text-sm font-semibold">
+      Pengembang: <span class="text-white font-bold">Yulistia Mohamad S.Pd</span>
+    </div>
+  </footer>
+
+  <script>
+    const PRESETS = [
+      {
+        title: "Kasus 1: Menu Rumah Makan",
+        story: "Dua pelanggan memesan menu di rumah makan. Pelanggan pertama membeli 2 porsi nasi goreng dan 3 gelas es teh seharga Rp36.000. Pelanggan kedua membeli 3 porsi nasi goreng dan 2 gelas es teh seharga Rp39.000. Tentukan harga 1 porsi nasi goreng dan 1 gelas es teh!",
+        xLabel: "Harga 1 porsi nasi goreng (dalam ribuan rupiah)",
+        yLabel: "Harga 1 gelas es teh (dalam ribuan rupiah)",
+        a1: 2, b1: 3, c1: 36,
+        a2: 3, b2: 2, c2: 39,
+        prefix: "Rp", suffix: ".000"
+      },
+      {
+        title: "Kasus 2: Tiket Wahana",
+        story: "Harga tiket masuk untuk 4 anak dan 2 dewasa adalah Rp100.000, sedangkan untuk 2 anak dan 3 dewasa adalah Rp90.000. Berapakah harga tiket untuk 1 anak dan 1 dewasa?",
+        xLabel: "Harga tiket 1 anak (dalam ribuan rupiah)",
+        yLabel: "Harga tiket 1 dewasa (dalam ribuan rupiah)",
+        a1: 4, b1: 2, c1: 100,
+        a2: 2, b2: 3, c2: 90,
+        prefix: "Rp", suffix: ".000"
+      },
+      {
+        title: "Kasus 3: Dua Bilangan",
+        story: "Jumlah dua bilangan adalah 12 dan selisih bilangan pertama terhadap bilangan kedua adalah 4. Tentukan kedua bilangan tersebut!",
+        xLabel: "Bilangan pertama",
+        yLabel: "Bilangan kedua",
+        a1: 1, b1: 1, c1: 12,
+        a2: 1, b2: -1, c2: 4,
+        prefix: "", suffix: ""
+      }
+    ];
+
+    let activePresetIdx = 0;
+    let activeSectionKey = 'tujuan';
+    let activeMethodTab = 'eliminasi';
+    let visibleStepCount = 99;
+    let totalStepsAvailable = 4;
+    let graphCenter = { x: 6, y: 8 };
+    let graphRange = 20;
+
+    function vHtml(symbol) {
+      return `<span class="math-var">${symbol}</span>`;
+    }
+
+    function nHtml(val) {
+      return `<span class="math-num">${val}</span>`;
+    }
+
+    function selectSection(key) {
+      activeSectionKey = key;
+      const sections = ['tujuan', 'kasus', 'eksplorasi', 'metode'];
+
+      sections.forEach(id => {
+        const card = document.getElementById(`card-${id}`);
+        const sec = document.getElementById(`sec-${id}`);
+        if (card) card.classList.toggle('active', id === key);
+        if (sec) sec.classList.toggle('hidden', id !== key);
+      });
+
+      if (key === 'eksplorasi') {
+        drawGraph();
+      }
+      typesetMath();
+    }
+
+    function fmtNum(n) {
+      if (!Number.isFinite(n)) return "?";
+      const r = Math.round(n * 1000) / 1000;
+      return Number.isInteger(r) ? String(r) : String(r).replace('.', ',');
+    }
+
+    function fmtTexNum(n) {
+      if (!Number.isFinite(n)) return "?";
+      const r = Math.round(n * 1000) / 1000;
+      return Number.isInteger(r) ? String(r) : String(r);
+    }
+
+    function wrapParen(n) {
+      return n < 0 ? `(${fmtTexNum(n)})` : fmtTexNum(n);
+    }
+
+    function formatLinearTex(a, b, c) {
+      let left = "";
+      if (a === 1) left += "x";
+      else if (a === -1) left += "-x";
+      else left += `${fmtTexNum(a)}x`;
+
+      if (b === 1) left += " + y";
+      else if (b === -1) left += " - y";
+      else if (b > 0) left += ` + ${fmtTexNum(b)}y`;
+      else if (b < 0) left += ` - ${fmtTexNum(Math.abs(b))}y`;
+
+      return `${left} = ${fmtTexNum(c)}`;
+    }
+
+    function formatLinearInlineHtml(a, b, c) {
+      let left = "";
+      if (a === 1) left += vHtml("x");
+      else if (a === -1) left += `-${vHtml("x")}`;
+      else left += `${nHtml(fmtNum(a))}${vHtml("x")}`;
+
+      if (b === 1) left += ` + ${vHtml("y")}`;
+      else if (b === -1) left += ` − ${vHtml("y")}`;
+      else if (b > 0) left += ` + ${nHtml(fmtNum(b))}${vHtml("y")}`;
+      else if (b < 0) left += ` − ${nHtml(fmtNum(Math.abs(b)))}${vHtml("y")}`;
+
+      return `${left} = ${nHtml(fmtNum(c))}`;
+    }
+
+    function gcd(a, b) {
+      a = Math.abs(Math.round(a));
+      b = Math.abs(Math.round(b));
+      while (b) {
+        const t = b;
+        b = a % b;
+        a = t;
+      }
+      return a || 1;
+    }
+
+    function lcm(a, b) {
+      if (a === 0 || b === 0) return 1;
+      return Math.abs(a * b) / gcd(a, b);
+    }
+
+    function renderPresetButtons() {
+      ['presetButtonsKasus', 'presetButtonsEksplorasi'].forEach(containerId => {
+        const wrap = document.getElementById(containerId);
+        if (!wrap) return;
+        wrap.innerHTML = '';
+        PRESETS.forEach((p, idx) => {
+          const b = document.createElement('button');
+          b.textContent = p.title;
+          b.className = `px-3.5 py-1.5 rounded-xl text-xs sm:text-sm font-bold transition ${
+            idx === activePresetIdx
+              ? 'bg-[#4C24A8] text-white'
+              : 'bg-purple-100 text-[#3B1D8A] hover:bg-purple-200'
+          }`;
+          b.onclick = () => loadPreset(idx);
+          wrap.appendChild(b);
+        });
+      });
+    }
+
+    function loadPreset(idx) {
+      activePresetIdx = idx;
+      const p = PRESETS[idx];
+      document.getElementById('storyTextKasus').textContent = p.story;
+      document.getElementById('varLegendKasus').innerHTML = `
+        <div>${vHtml("x")} = ${p.xLabel}</div>
+        <div>${vHtml("y")} = ${p.yLabel}</div>
+      `;
+      document.getElementById('a1').value = p.a1;
+      document.getElementById('b1').value = p.b1;
+      document.getElementById('c1').value = p.c1;
+      document.getElementById('a2').value = p.a2;
+      document.getElementById('b2').value = p.b2;
+      document.getElementById('c2').value = p.c2;
+
+      renderPresetButtons();
+      visibleStepCount = 99;
+      updateExploration(true);
+    }
+
+    function resetCurrentPreset() {
+      loadPreset(activePresetIdx);
+    }
+
+    function getParams() {
+      return {
+        a1: parseFloat(document.getElementById('a1').value) || 0,
+        b1: parseFloat(document.getElementById('b1').value) || 0,
+        c1: parseFloat(document.getElementById('c1').value) || 0,
+        a2: parseFloat(document.getElementById('a2').value) || 0,
+        b2: parseFloat(document.getElementById('b2').value) || 0,
+        c2: parseFloat(document.getElementById('c2').value) || 0
+      };
+    }
+
+    function solveSPLDV({ a1, b1, c1, a2, b2, c2 }) {
+      const det = a1 * b2 - a2 * b1;
+      if (Math.abs(det) < 1e-9) {
+        const collinear = Math.abs(a1 * c2 - a2 * c1) < 1e-9 && Math.abs(b1 * c2 - b2 * c1) < 1e-9;
+        return { unique: false, collinear };
+      }
+      return {
+        unique: true,
+        x: (c1 * b2 - c2 * b1) / det,
+        y: (a1 * c2 - a2 * c1) / det
+      };
+    }
+
+    function autoFitGraph() {
+      const sol = solveSPLDV(getParams());
+      if (sol.unique) {
+        graphCenter = { x: sol.x, y: sol.y };
+        const span = Math.max(Math.abs(sol.x), Math.abs(sol.y), 8);
+        graphRange = Math.max(12, Math.ceil(span * 2.2));
+      } else {
+        graphCenter = { x: 0, y: 0 };
+        graphRange = 20;
+      }
+      drawGraph();
+    }
+
+    function adjustScale(factor) {
+      graphRange = Math.max(4, Math.min(240, graphRange * factor));
+      drawGraph();
+    }
+
+    function updateExploration(shouldAutoFit = false) {
+      const params = getParams();
+      const sol = solveSPLDV(params);
+      const preset = PRESETS[activePresetIdx];
+
+      const eq1Tex = formatLinearTex(params.a1, params.b1, params.c1);
+      const eq2Tex = formatLinearTex(params.a2, params.b2, params.c2);
+      const eq1Html = formatLinearInlineHtml(params.a1, params.b1, params.c1);
+      const eq2Html = formatLinearInlineHtml(params.a2, params.b2, params.c2);
+
+      document.getElementById('modelPreviewKasus').innerHTML = `
+        $$\\begin{cases} ${eq1Tex} & \\text{...(1)} \\\\ ${eq2Tex} & \\text{...(2)} \\end{cases}$$
+      `;
+
+      document.getElementById('activeSystemEqText').innerHTML = `
+        Sistem Aktif: &nbsp; (1) ${eq1Html} &nbsp;&nbsp;|&nbsp;&nbsp; (2) ${eq2Html}
+      `;
+
+      const banner = document.getElementById('solutionBanner');
+      if (sol.unique) {
+        const xs = fmtTexNum(sol.x);
+        const ys = fmtTexNum(sol.y);
+        const ctxStr = preset.prefix
+          ? `<div class="text-xs sm:text-sm font-semibold text-slate-700 mt-1.5">Interpretasi: ${vHtml("x")} = ${preset.prefix}${fmtNum(sol.x)}${preset.suffix} dan ${vHtml("y")} = ${preset.prefix}${fmtNum(sol.y)}${preset.suffix}</div>`
+          : '';
+        banner.innerHTML = `
+          <div class="text-xs font-extrabold uppercase tracking-wider text-[#4C24A8]">Himpunan Penyelesaian (HP)</div>
+          <div class="text-base sm:text-lg font-extrabold text-[#1E1B4B] mt-1">
+            $$\\text{HP} = \\{(${xs},\\; ${ys})\\}$$
+          </div>
+          ${ctxStr}
+        `;
+      } else if (sol.collinear) {
+        banner.innerHTML = `<div class="font-bold text-[#1E1B4B]">Garis Berimpit — Tak Hingga Penyelesaian</div>`;
+      } else {
+        banner.innerHTML = `<div class="font-bold text-[#1E1B4B]">Garis Sejajar — Tidak Ada Penyelesaian (∅)</div>`;
+      }
+
+      if (shouldAutoFit) autoFitGraph();
+      else drawGraph();
+
+      renderMethodSteps(params, sol);
+      typesetMath();
+    }
+
+    function typesetMath() {
+      if (window.MathJax && window.MathJax.typesetPromise) {
+        window.MathJax.typesetPromise().catch(() => {});
+      }
+    }
+
+    function switchMethodTab(tab) {
+      activeMethodTab = tab;
+      ['eliminasi', 'substitusi', 'grafik', 'campuran'].forEach(t => {
+        const btn = document.getElementById(`tab-${t}`);
+        btn.className = `px-4 py-2 rounded-xl text-xs sm:text-sm font-bold transition ${
+          t === tab ? 'bg-[#4C24A8] text-white' : 'bg-purple-100 text-[#3B1D8A] hover:bg-purple-200'
+        }`;
+      });
+      visibleStepCount = 99;
+      updateExploration(false);
+    }
+
+    function startStepByStep() {
+      visibleStepCount = 1;
+      updateExploration(false);
+    }
+
+    function nextStep() {
+      if (visibleStepCount < totalStepsAvailable) {
+        visibleStepCount++;
+        updateExploration(false);
+      }
+    }
+
+    function showAllSteps() {
+      visibleStepCount = 99;
+      updateExploration(false);
+    }
+
+    function renderMethodSteps({ a1, b1, c1, a2, b2, c2 }, sol) {
+      const box = document.getElementById('methodStepsBox');
+      const eq1Tex = formatLinearTex(a1, b1, c1);
+      const eq2Tex = formatLinearTex(a2, b2, c2);
+      const eq1Html = formatLinearInlineHtml(a1, b1, c1);
+      const eq2Html = formatLinearInlineHtml(a2, b2, c2);
+
+      if (!sol.unique) {
+        totalStepsAvailable = 1;
+        updateStepControls();
+        box.innerHTML = `
+          <div class="step-card space-y-2">
+            <div class="font-bold text-[#1E1B4B]">Sistem Persamaan:</div>
+            <div class="math-box">$$\\begin{cases} ${eq1Tex} \\\\ ${eq2Tex} \\end{cases}$$</div>
+            <p class="text-sm text-slate-700 leading-relaxed">
+              Determinan koefisien bernilai ${nHtml("0")}, sehingga kedua garis tidak berpotongan pada satu titik tunggal.
+            </p>
+          </div>
+        `;
+        return;
+      }
+
+      const xs = fmtTexNum(sol.x);
+      const ys = fmtTexNum(sol.y);
+      let stepCards = [];
+
+      if (activeMethodTab === 'eliminasi') {
+        // Langkah 1: Eliminasi y untuk mencari x
+        const targetY = Number.isInteger(b1) && Number.isInteger(b2) ? lcm(b1, b2) : Math.abs(b1 * b2) || 1;
+        const m1 = b1 !== 0 ? Math.abs(targetY / b1) : 1;
+        const m2 = b2 !== 0 ? Math.abs(targetY / b2) : 1;
+        const na1 = a1 * m1, nb1 = b1 * m1, nc1 = c1 * m1;
+        const na2 = a2 * m2, nb2 = b2 * m2, nc2 = c2 * m2;
+        const opY = (nb1 * nb2 > 0) ? '-' : '+';
+        const diffA = opY === '-' ? (na1 - na2) : (na1 + na2);
+        const diffC1 = opY === '-' ? (nc1 - nc2) : (nc1 + nc2);
+
+        stepCards.push(`
+          <div class="step-card space-y-2.5">
+            <div class="text-xs sm:text-sm font-extrabold uppercase tracking-wider text-[#4C24A8]">
+              Langkah 1 — Eliminasi Variabel ${vHtml("y")} (Mencari Nilai ${vHtml("x")})
+            </div>
+            <p class="text-sm sm:text-base text-slate-700 leading-relaxed">
+              Samakan koefisien ${vHtml("y")} dengan mengalikan persamaan (1) dengan ${nHtml(fmtNum(m1))} dan persamaan (2) dengan ${nHtml(fmtNum(m2))}:
+            </p>
+            <div class="math-box">
+              $$\\begin{aligned}
+              ${formatLinearTex(na1, nb1, nc1)} &\\quad \\text{(Persamaan 1 } \\times ${fmtTexNum(m1)}\\text{)} \\\\
+              ${formatLinearTex(na2, nb2, nc2)} &\\quad \\text{(Persamaan 2 } \\times ${fmtTexNum(m2)}\\text{)} \\\\
+              \\hline
+              ${fmtTexNum(diffA)}x &= ${fmtTexNum(diffC1)} \\\\
+              x &= \\frac{${fmtTexNum(diffC1)}}{${fmtTexNum(diffA)}} \\\\
+              x &= ${xs}
+              \\end{aligned}$$
+            </div>
+          </div>
+        `);
+
+        // Langkah 2: Eliminasi x untuk mencari y
+        const targetX = Number.isInteger(a1) && Number.isInteger(a2) ? lcm(a1, a2) : Math.abs(a1 * a2) || 1;
+        const k1 = a1 !== 0 ? Math.abs(targetX / a1) : 1;
+        const k2 = a2 !== 0 ? Math.abs(targetX / a2) : 1;
+        const ma1 = a1 * k1, mb1 = b1 * k1, mc1 = c1 * k1;
+        const ma2 = a2 * k2, mb2 = b2 * k2, mc2 = c2 * k2;
+        const opX = (ma1 * ma2 > 0) ? '-' : '+';
+        const diffB = opX === '-' ? (mb1 - mb2) : (mb1 + mb2);
+        const diffC2 = opX === '-' ? (mc1 - mc2) : (mc1 + mc2);
+
+        stepCards.push(`
+          <div class="step-card space-y-2.5">
+            <div class="text-xs sm:text-sm font-extrabold uppercase tracking-wider text-[#4C24A8]">
+              Langkah 2 — Eliminasi Variabel ${vHtml("x")} (Mencari Nilai ${vHtml("y")})
+            </div>
+            <p class="text-sm sm:text-base text-slate-700 leading-relaxed">
+              Samakan koefisien ${vHtml("x")} dengan mengalikan persamaan (1) dengan ${nHtml(fmtNum(k1))} dan persamaan (2) dengan ${nHtml(fmtNum(k2))}:
+            </p>
+            <div class="math-box">
+              $$\\begin{aligned}
+              ${formatLinearTex(ma1, mb1, mc1)} &\\quad \\text{(Persamaan 1 } \\times ${fmtTexNum(k1)}\\text{)} \\\\
+              ${formatLinearTex(ma2, mb2, mc2)} &\\quad \\text{(Persamaan 2 } \\times ${fmtTexNum(k2)}\\text{)} \\\\
+              \\hline
+              ${fmtTexNum(diffB)}y &= ${fmtTexNum(diffC2)} \\\\
+              y &= \\frac{${fmtTexNum(diffC2)}}{${fmtTexNum(diffB)}} \\\\
+              y &= ${ys}
+              \\end{aligned}$$
+            </div>
+          </div>
+        `);
+
+        stepCards.push(`
+          <div class="step-card space-y-2.5 bg-purple-100/60">
+            <div class="text-xs sm:text-sm font-extrabold uppercase tracking-wider text-[#4C24A8]">
+              Langkah 3 — Kesimpulan
+            </div>
+            <div class="math-box">
+              $$\\text{Himpunan Penyelesaian (HP)} = \\{(${xs},\\; ${ys})\\}$$
+            </div>
+          </div>
+        `);
+      } else if (activeMethodTab === 'substitusi') {
+        if (Math.abs(b1) > 1e-9) {
+          stepCards.push(`
+            <div class="step-card space-y-2.5">
+              <div class="text-xs sm:text-sm font-extrabold uppercase tracking-wider text-[#4C24A8]">
+                Langkah 1 — Nyatakan ${vHtml("y")} dalam Variabel ${vHtml("x")}
+              </div>
+              <p class="text-sm sm:text-base text-slate-700 leading-relaxed">
+                Ubah persamaan (1) menjadi bentuk eksplisit untuk variabel ${vHtml("y")}:
+              </p>
+              <div class="math-box">
+                $$\\begin{aligned}
+                ${eq1Tex} \\\\
+                ${fmtTexNum(b1)}y &= ${fmtTexNum(c1)} - ${wrapParen(a1)}x \\\\
+                y &= \\frac{${fmtTexNum(c1)} - ${wrapParen(a1)}x}{${fmtTexNum(b1)}} \\quad \\text{...(Persamaan 3)}
+                \\end{aligned}$$
+              </div>
+            </div>
+          `);
+
+          const multC1 = b2 * c1;
+          const multA1 = b2 * a1;
+          const coefX = a2 * b1 - multA1;
+          const rhsNum = c2 * b1 - multC1;
+
+          stepCards.push(`
+            <div class="step-card space-y-2.5">
+              <div class="text-xs sm:text-sm font-extrabold uppercase tracking-wider text-[#4C24A8]">
+                Langkah 2 — Substitusikan Persamaan (3) ke Persamaan (2)
+              </div>
+              <p class="text-sm sm:text-base text-slate-700 leading-relaxed">
+                Masukkan bentuk ${vHtml("y")} dari persamaan (3) ke persamaan (2) untuk memperoleh nilai ${vHtml("x")}:
+              </p>
+              <div class="math-box">
+                $$\\begin{aligned}
+                ${eq2Tex} \\\\
+                ${fmtTexNum(a2)}x + ${wrapParen(b2)}\\left(\\frac{${fmtTexNum(c1)} - ${wrapParen(a1)}x}{${fmtTexNum(b1)}}\\right) &= ${fmtTexNum(c2)} \\\\
+                ${fmtTexNum(a2 * b1)}x + ${fmtTexNum(multC1)} - ${wrapParen(multA1)}x &= ${fmtTexNum(c2 * b1)} \\\\
+                ${fmtTexNum(coefX)}x &= ${fmtTexNum(rhsNum)} \\\\
+                x &= \\frac{${fmtTexNum(rhsNum)}}{${fmtTexNum(coefX)}} = ${xs}
+                \\end{aligned}$$
+              </div>
+            </div>
+          `);
+
+          stepCards.push(`
+            <div class="step-card space-y-2.5">
+              <div class="text-xs sm:text-sm font-extrabold uppercase tracking-wider text-[#4C24A8]">
+                Langkah 3 — Substitusikan Nilai ${vHtml("x")} = ${nHtml(fmtNum(sol.x))} ke Persamaan (3)
+              </div>
+              <p class="text-sm sm:text-base text-slate-700 leading-relaxed">
+                Hitung nilai ${vHtml("y")} dengan mengganti variabel ${vHtml("x")} dengan ${nHtml(fmtNum(sol.x))}:
+              </p>
+              <div class="math-box">
+                $$\\begin{aligned}
+                y &= \\frac{${fmtTexNum(c1)} - ${wrapParen(a1)} \\cdot ${wrapParen(sol.x)}}{${fmtTexNum(b1)}} \\\\
+                y &= \\frac{${fmtTexNum(c1 - a1 * sol.x)}}{${fmtTexNum(b1)}} \\\\
+                y &= ${ys}
+                \\end{aligned}$$
+              </div>
+            </div>
+          `);
+        } else {
+          stepCards.push(`
+            <div class="step-card space-y-2.5">
+              <div class="text-xs sm:text-sm font-extrabold uppercase tracking-wider text-[#4C24A8]">
+                Langkah 1 & 2 — Substitusi Langsung
+              </div>
+              <div class="math-box">
+                $$\\begin{aligned}
+                x &= \\frac{${fmtTexNum(c1)}}{${fmtTexNum(a1)}} = ${xs} \\\\
+                y &= ${ys}
+                \\end{aligned}$$
+              </div>
+            </div>
+          `);
+        }
+
+        stepCards.push(`
+          <div class="step-card space-y-2.5 bg-purple-100/60">
+            <div class="text-xs sm:text-sm font-extrabold uppercase tracking-wider text-[#4C24A8]">
+              Langkah Akhir — Kesimpulan
+            </div>
+            <div class="math-box">
+              $$\\text{Himpunan Penyelesaian (HP)} = \\{(${xs},\\; ${ys})\\}$$
+            </div>
+          </div>
+        `);
+      } else if (activeMethodTab === 'grafik') {
+        const x1Int = Math.abs(a1) > 1e-9 ? fmtTexNum(c1 / a1) : "\\text{tidak ada}";
+        const y1Int = Math.abs(b1) > 1e-9 ? fmtTexNum(c1 / b1) : "\\text{tidak ada}";
+        const x2Int = Math.abs(a2) > 1e-9 ? fmtTexNum(c2 / a2) : "\\text{tidak ada}";
+        const y2Int = Math.abs(b2) > 1e-9 ? fmtTexNum(c2 / b2) : "\\text{tidak ada}";
+
+        stepCards.push(`
+          <div class="step-card space-y-2.5">
+            <div class="text-xs sm:text-sm font-extrabold uppercase tracking-wider text-rose-700">
+              Langkah 1 — Titik Potong Sumbu untuk Garis (1): ${eq1Html}
+            </div>
+            <p class="text-sm sm:text-base text-slate-700 leading-relaxed">
+              Tentukan titik potong garis pertama terhadap sumbu-${vHtml("x")} dan sumbu-${vHtml("y")}:
+            </p>
+            <div class="math-box">
+              $$\\begin{aligned}
+              \\text{Jika } x = 0 &\\Rightarrow ${fmtTexNum(b1)}y = ${fmtTexNum(c1)} \\Rightarrow y = ${y1Int} \\quad \\longrightarrow \\text{Titik } (0,\\; ${y1Int}) \\\\
+              \\text{Jika } y = 0 &\\Rightarrow ${fmtTexNum(a1)}x = ${fmtTexNum(c1)} \\Rightarrow x = ${x1Int} \\quad \\longrightarrow \\text{Titik } (${x1Int},\\; 0)
+              \\end{aligned}$$
+            </div>
+          </div>
+        `);
+
+        stepCards.push(`
+          <div class="step-card space-y-2.5">
+            <div class="text-xs sm:text-sm font-extrabold uppercase tracking-wider text-blue-700">
+              Langkah 2 — Titik Potong Sumbu untuk Garis (2): ${eq2Html}
+            </div>
+            <p class="text-sm sm:text-base text-slate-700 leading-relaxed">
+              Tentukan titik potong garis kedua terhadap sumbu-${vHtml("x")} dan sumbu-${vHtml("y")}:
+            </p>
+            <div class="math-box">
+              $$\\begin{aligned}
+              \\text{Jika } x = 0 &\\Rightarrow ${fmtTexNum(b2)}y = ${fmtTexNum(c2)} \\Rightarrow y = ${y2Int} \\quad \\longrightarrow \\text{Titik } (0,\\; ${y2Int}) \\\\
+              \\text{Jika } y = 0 &\\Rightarrow ${fmtTexNum(a2)}x = ${fmtTexNum(c2)} \\Rightarrow x = ${x2Int} \\quad \\longrightarrow \\text{Titik } (${x2Int},\\; 0)
+              \\end{aligned}$$
+            </div>
+          </div>
+        `);
+
+        stepCards.push(`
+          <div class="step-card space-y-2.5 bg-purple-100/60">
+            <div class="text-xs sm:text-sm font-extrabold uppercase tracking-wider text-emerald-700">
+              Langkah 3 — Titik Potong Kedua Garis pada Bidang Kartesius
+            </div>
+            <p class="text-sm sm:text-base text-slate-700 leading-relaxed">
+              Perpotongan garis merah dan garis biru menghasilkan koordinat penyelesaian:
+            </p>
+            <div class="math-box">
+              $$\\text{Titik Potong} = (${xs},\\; ${ys}) \\quad \\Longrightarrow \\quad \\text{HP} = \\{(${xs},\\; ${ys})\\}$$
+            </div>
+          </div>
+        `);
+      } else if (activeMethodTab === 'campuran') {
+        const targetY = Number.isInteger(b1) && Number.isInteger(b2) ? lcm(b1, b2) : Math.abs(b1 * b2) || 1;
+        const m1 = b1 !== 0 ? Math.abs(targetY / b1) : 1;
+        const m2 = b2 !== 0 ? Math.abs(targetY / b2) : 1;
+        const na1 = a1 * m1, nb1 = b1 * m1, nc1 = c1 * m1;
+        const na2 = a2 * m2, nb2 = b2 * m2, nc2 = c2 * m2;
+        const opY = (nb1 * nb2 > 0) ? '-' : '+';
+        const diffA = opY === '-' ? (na1 - na2) : (na1 + na2);
+        const diffC1 = opY === '-' ? (nc1 - nc2) : (nc1 + nc2);
+
+        stepCards.push(`
+          <div class="step-card space-y-2.5">
+            <div class="text-xs sm:text-sm font-extrabold uppercase tracking-wider text-[#4C24A8]">
+              Langkah 1 (Tahap Eliminasi) — Eliminasi ${vHtml("y")} untuk Mendapatkan ${vHtml("x")}
+            </div>
+            <p class="text-sm sm:text-base text-slate-700 leading-relaxed">
+              Samakan koefisien ${vHtml("y")} dengan mengalikan persamaan (1) dengan ${nHtml(fmtNum(m1))} dan persamaan (2) dengan ${nHtml(fmtNum(m2))}:
+            </p>
+            <div class="math-box">
+              $$\\begin{aligned}
+              ${formatLinearTex(na1, nb1, nc1)} &\\quad \\text{(Persamaan 1 } \\times ${fmtTexNum(m1)}\\text{)} \\\\
+              ${formatLinearTex(na2, nb2, nc2)} &\\quad \\text{(Persamaan 2 } \\times ${fmtTexNum(m2)}\\text{)} \\\\
+              \\hline
+              ${fmtTexNum(diffA)}x &= ${fmtTexNum(diffC1)} \\\\
+              x &= \\frac{${fmtTexNum(diffC1)}}{${fmtTexNum(diffA)}} = ${xs}
+              \\end{aligned}$$
+            </div>
+          </div>
+        `);
+
+        const remC = c1 - a1 * sol.x;
+        stepCards.push(`
+          <div class="step-card space-y-2.5">
+            <div class="text-xs sm:text-sm font-extrabold uppercase tracking-wider text-[#4C24A8]">
+              Langkah 2 (Tahap Substitusi) — Substitusikan Nilai ${vHtml("x")} = ${nHtml(fmtNum(sol.x))} ke Persamaan (1)
+            </div>
+            <p class="text-sm sm:text-base text-slate-700 leading-relaxed">
+              Masukkan nilai ${vHtml("x")} = ${nHtml(fmtNum(sol.x))} yang sudah diperoleh ke persamaan (1) untuk menghitung ${vHtml("y")}:
+            </p>
+            <div class="math-box">
+              $$\\begin{aligned}
+              ${eq1Tex} \\\\
+              ${fmtTexNum(a1)}(${xs}) + ${wrapParen(b1)}y &= ${fmtTexNum(c1)} \\\\
+              ${fmtTexNum(a1 * sol.x)} + ${wrapParen(b1)}y &= ${fmtTexNum(c1)} \\\\
+              ${fmtTexNum(b1)}y &= ${fmtTexNum(c1)} - ${wrapParen(a1 * sol.x)} \\\\
+              ${fmtTexNum(b1)}y &= ${fmtTexNum(remC)} \\\\
+              y &= \\frac{${fmtTexNum(remC)}}{${fmtTexNum(b1)}} = ${ys}
+              \\end{aligned}$$
+            </div>
+          </div>
+        `);
+
+        stepCards.push(`
+          <div class="step-card space-y-2.5 bg-purple-100/60">
+            <div class="text-xs sm:text-sm font-extrabold uppercase tracking-wider text-[#4C24A8]">
+              Langkah 3 — Kesimpulan
+            </div>
+            <div class="math-box">
+              $$\\text{Himpunan Penyelesaian (HP)} = \\{(${xs},\\; ${ys})\\}$$
+            </div>
+          </div>
+        `);
+      }
+
+      totalStepsAvailable = stepCards.length;
+      const shown = stepCards.slice(0, Math.min(visibleStepCount, totalStepsAvailable));
+      box.innerHTML = shown.join('');
+      updateStepControls();
+    }
+
+    function updateStepControls() {
+      const indicator = document.getElementById('stepIndicatorText');
+      const btnNext = document.getElementById('btnNextStep');
+      const shownNow = Math.min(visibleStepCount, totalStepsAvailable);
+
+      if (shownNow >= totalStepsAvailable) {
+        indicator.textContent = `Menampilkan semua langkah (${totalStepsAvailable} dari ${totalStepsAvailable} langkah)`;
+        btnNext.disabled = true;
+      } else {
+        indicator.textContent = `Mode Bertahap: Menampilkan ${shownNow} dari ${totalStepsAvailable} langkah`;
+        btnNext.disabled = false;
+      }
+    }
+
+    // --- Penggambaran Grafik Kartesius ---
+    const canvas = document.getElementById('graphCanvas');
+    const ctx = canvas.getContext('2d');
+
+    function worldToCanvas(wx, wy) {
+      const w = canvas.width;
+      const h = canvas.height;
+      const xMin = graphCenter.x - graphRange / 2;
+      const xMax = graphCenter.x + graphRange / 2;
+      const yMin = graphCenter.y - graphRange / 2;
+      const yMax = graphCenter.y + graphRange / 2;
+      return {
+        cx: ((wx - xMin) / (xMax - xMin)) * w,
+        cy: h - ((wy - yMin) / (yMax - yMin)) * h
+      };
+    }
+
+    function canvasToWorld(cx, cy) {
+      const w = canvas.width;
+      const h = canvas.height;
+      const xMin = graphCenter.x - graphRange / 2;
+      const xMax = graphCenter.x + graphRange / 2;
+      const yMin = graphCenter.y - graphRange / 2;
+      const yMax = graphCenter.y + graphRange / 2;
+      return {
+        wx: xMin + (cx / w) * (xMax - xMin),
+        wy: yMin + ((h - cy) / h) * (yMax - yMin)
+      };
+    }
+
+    function niceStep(range) {
+      const rough = range / 8;
+      const pow10 = Math.pow(10, Math.floor(Math.log10(Math.max(rough, 0.1))));
+      const norm = rough / pow10;
+      if (norm <= 1) return pow10;
+      if (norm <= 2) return 2 * pow10;
+      if (norm <= 5) return 5 * pow10;
+      return 10 * pow10;
+    }
+
+    function drawLineEq(a, b, c, color) {
+      const xMin = graphCenter.x - graphRange / 2;
+      const xMax = graphCenter.x + graphRange / 2;
+      const yMin = graphCenter.y - graphRange / 2;
+      const yMax = graphCenter.y + graphRange / 2;
+      const pts = [];
+
+      if (Math.abs(b) > 1e-9) {
+        const y1 = (c - a * xMin) / b;
+        const y2 = (c - a * xMax) / b;
+        if (y1 >= yMin - graphRange && y1 <= yMax + graphRange) pts.push({ x: xMin, y: y1 });
+        if (y2 >= yMin - graphRange && y2 <= yMax + graphRange) pts.push({ x: xMax, y: y2 });
+      }
+      if (Math.abs(a) > 1e-9) {
+        const x1 = (c - b * yMin) / a;
+        const x2 = (c - b * yMax) / a;
+        if (x1 >= xMin - graphRange && x1 <= xMax + graphRange) pts.push({ x: x1, y: yMin });
+        if (x2 >= xMin - graphRange && x2 <= xMax + graphRange) pts.push({ x: x2, y: yMax });
+      }
+
+      if (pts.length >= 2) {
+        const p1 = worldToCanvas(pts[0].x, pts[0].y);
+        const p2 = worldToCanvas(pts[1].x, pts[1].y);
+        ctx.save();
+        ctx.strokeStyle = color;
+        ctx.lineWidth = 3;
+        ctx.beginPath();
+        ctx.moveTo(p1.cx, p1.cy);
+        ctx.lineTo(p2.cx, p2.cy);
+        ctx.stroke();
+        ctx.restore();
+      }
+    }
+
+    function drawGraph() {
+      const w = canvas.width;
+      const h = canvas.height;
+      ctx.clearRect(0, 0, w, h);
+
+      const xMin = graphCenter.x - graphRange / 2;
+      const xMax = graphCenter.x + graphRange / 2;
+      const yMin = graphCenter.y - graphRange / 2;
+      const yMax = graphCenter.y + graphRange / 2;
+      const step = niceStep(graphRange);
+
+      ctx.strokeStyle = '#EDE9FE';
+      ctx.lineWidth = 1;
+      ctx.font = '11px "Plus Jakarta Sans", sans-serif';
+      ctx.fillStyle = '#5B21B6';
+
+      const origin = worldToCanvas(0, 0);
+
+      for (let gx = Math.floor(xMin / step) * step; gx <= xMax; gx += step) {
+        const { cx } = worldToCanvas(gx, 0);
+        ctx.beginPath();
+        ctx.moveTo(cx, 0);
+        ctx.lineTo(cx, h);
+        ctx.stroke();
+
+        if (Math.abs(gx) > step * 0.05) {
+          const ly = Math.min(Math.max(origin.cy + 14, 14), h - 6);
+          ctx.fillText(fmtNum(gx), cx + 3, ly);
+        }
+      }
+
+      for (let gy = Math.floor(yMin / step) * step; gy <= yMax; gy += step) {
+        const { cy } = worldToCanvas(0, gy);
+        ctx.beginPath();
+        ctx.moveTo(0, cy);
+        ctx.lineTo(w, cy);
+        ctx.stroke();
+
+        if (Math.abs(gy) > step * 0.05) {
+          const lx = Math.min(Math.max(origin.cx + 6, 4), w - 34);
+          ctx.fillText(fmtNum(gy), lx, cy - 3);
+        }
+      }
+
+      // Sumbu X dan Y
+      ctx.strokeStyle = '#3B1D8A';
+      ctx.lineWidth = 2;
+      if (origin.cy >= 0 && origin.cy <= h) {
+        ctx.beginPath();
+        ctx.moveTo(0, origin.cy);
+        ctx.lineTo(w, origin.cy);
+        ctx.stroke();
+      }
+      if (origin.cx >= 0 && origin.cx <= w) {
+        ctx.beginPath();
+        ctx.moveTo(origin.cx, 0);
+        ctx.lineTo(origin.cx, h);
+        ctx.stroke();
+      }
+
+      const params = getParams();
+      drawLineEq(params.a1, params.b1, params.c1, '#DC2626');
+      drawLineEq(params.a2, params.b2, params.c2, '#2563EB');
+
+      const sol = solveSPLDV(params);
+      if (sol.unique) {
+        const pt = worldToCanvas(sol.x, sol.y);
+
+        // Garis bantu putus-putus ke sumbu x dan y
+        ctx.save();
+        ctx.setLineDash([4, 4]);
+        ctx.strokeStyle = '#16A34A';
+        ctx.lineWidth = 1.5;
+        if (origin.cy >= 0 && origin.cy <= h) {
+          ctx.beginPath();
+          ctx.moveTo(pt.cx, pt.cy);
+          ctx.lineTo(pt.cx, origin.cy);
+          ctx.stroke();
+        }
+        if (origin.cx >= 0 && origin.cx <= w) {
+          ctx.beginPath();
+          ctx.moveTo(pt.cx, pt.cy);
+          ctx.lineTo(origin.cx, pt.cy);
+          ctx.stroke();
+        }
+        ctx.restore();
+
+        // Titik potong
+        ctx.fillStyle = '#16A34A';
+        ctx.strokeStyle = '#FFFFFF';
+        ctx.lineWidth = 2.5;
+        ctx.beginPath();
+        ctx.arc(pt.cx, pt.cy, 7, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.stroke();
+
+        ctx.font = 'bold 12px "Plus Jakarta Sans", sans-serif';
+        ctx.fillStyle = '#14532D';
+        ctx.fillText(`(${fmtNum(sol.x)}, ${fmtNum(sol.y)})`, pt.cx + 10, pt.cy - 8);
+      }
+    }
+
+    canvas.addEventListener('mousemove', (e) => {
+      const rect = canvas.getBoundingClientRect();
+      const cx = (e.clientX - rect.left) * (canvas.width / rect.width);
+      const cy = (e.clientY - rect.top) * (canvas.height / rect.height);
+      const { wx, wy } = canvasToWorld(cx, cy);
+      document.getElementById('cursorCoord').textContent = `(${wx.toFixed(1)}, ${wy.toFixed(1)})`;
+    });
+
+    // Inisialisasi awal pada tab Tujuan
+    loadPreset(0);
+    selectSection('tujuan');
+  </script>
+</body>
+</html>

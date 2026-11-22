@@ -1,0 +1,1013 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Media Interaktif SPLDV - Metode Eliminasi</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Nunito', sans-serif;
+            background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 50%, #a855f7 100%);
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+
+        /* Animasi mengambang lembut */
+        @keyframes float {
+            0%, 100% { transform: translateY(0px); }
+            50% { transform: translateY(-6px); }
+        }
+        .animate-float {
+            animation: float 3s ease-in-out infinite;
+        }
+
+        /* Animasi gelombang indikator musik latar */
+        @keyframes pulse-ring {
+            0% { transform: scale(0.8); opacity: 0.8; }
+            100% { transform: scale(1.6); opacity: 0; }
+        }
+        .speaking-ring {
+            animation: pulse-ring 1.2s cubic-bezier(0.215, 0.61, 0.355, 1) infinite;
+        }
+
+        /* Animasi eliminasi / pencoretan item */
+        @keyframes strikeFade {
+            0% { transform: scale(1); opacity: 1; filter: grayscale(0%); }
+            50% { transform: scale(1.1) rotate(-5deg); opacity: 0.7; filter: grayscale(50%); }
+            100% { transform: scale(0.85); opacity: 0.25; filter: grayscale(100%); }
+        }
+        .eliminated-item {
+            animation: strikeFade 0.8s forwards;
+            position: relative;
+        }
+        .eliminated-item::after {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: -5%;
+            width: 110%;
+            height: 4px;
+            background-color: #ef4444;
+            transform: rotate(-18deg);
+            border-radius: 999px;
+            box-shadow: 0 2px 4px rgba(239, 68, 68, 0.5);
+        }
+
+        /* Animasi muncul pop-in */
+        @keyframes popIn {
+            0% { transform: scale(0.5); opacity: 0; }
+            70% { transform: scale(1.08); opacity: 1; }
+            100% { transform: scale(1); opacity: 1; }
+        }
+        .pop-in {
+            animation: popIn 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+        }
+
+        /* Animasi getar saat jawaban kurang tepat */
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            25% { transform: translateX(-6px); }
+            75% { transform: translateX(6px); }
+        }
+        .shake-error {
+            animation: shake 0.35s ease-in-out;
+        }
+
+        /* Animasi konfeti perayaan akhir */
+        .confetti {
+            position: fixed;
+            width: 10px;
+            height: 10px;
+            z-index: 50;
+            pointer-events: none;
+            animation: confettiFall linear forwards;
+        }
+        @keyframes confettiFall {
+            0% { transform: translateY(-10vh) rotate(0deg); opacity: 1; }
+            100% { transform: translateY(105vh) rotate(720deg); opacity: 0; }
+        }
+    </style>
+</head>
+<body class="p-3 sm:p-5 md:p-6 flex flex-col items-center justify-between text-slate-800">
+
+    <!-- Header & Kontrol Backsound -->
+    <header class="w-full max-w-5xl bg-white/95 backdrop-blur-md rounded-2xl shadow-lg p-3 sm:p-4 mb-4 flex flex-wrap items-center justify-between gap-3 border border-indigo-100">
+        <div class="flex items-center gap-3">
+            <div class="w-11 h-11 rounded-xl bg-amber-400 flex items-center justify-center shadow-inner text-white font-black text-xl">
+                🧮
+            </div>
+            <div>
+                <h1 class="text-base sm:text-lg md:text-xl font-extrabold text-indigo-950 leading-tight">
+                    SPLDV: Metode Eliminasi Murni
+                </h1>
+                <p class="text-xs sm:text-sm text-indigo-600 font-semibold">Studi Kasus: Koperasi Sekolah (Jus &amp; Nasi Goreng)</p>
+            </div>
+        </div>
+
+        <!-- Kontrol Backsound Musik Latar -->
+        <div class="flex items-center gap-2 bg-indigo-50 px-3 py-2 rounded-xl border border-indigo-100">
+            <div class="relative flex items-center justify-center w-8 h-8">
+                <span id="musicPulse" class="hidden absolute inset-0 rounded-full bg-emerald-400 speaking-ring"></span>
+                <span id="musicIcon" class="relative z-10 text-lg">🎵</span>
+            </div>
+            <span class="hidden sm:inline text-xs font-extrabold text-indigo-800">Backsound:</span>
+            <button id="bgmToggleBtn" onclick="toggleBacksound()" class="px-3.5 py-1.5 bg-indigo-600 hover:bg-indigo-700 active:scale-95 text-white text-xs sm:text-sm font-bold rounded-lg transition shadow-sm flex items-center gap-1.5">
+                <span id="bgmBtnIcon">🔊</span>
+                <span id="bgmBtnText">Backsound Nyala</span>
+            </button>
+        </div>
+    </header>
+
+    <!-- Indikator Progres Langkah -->
+    <div class="w-full max-w-5xl mb-4">
+        <div class="flex justify-between text-xs font-bold text-white/90 mb-1.5 px-1">
+            <span id="stepBadge">Langkah 1 dari 5: Pengenalan Soal</span>
+            <span id="progressPercent">20%</span>
+        </div>
+        <div class="w-full h-3 bg-white/25 rounded-full overflow-hidden p-0.5 backdrop-blur-sm">
+            <div id="progressBar" class="h-full bg-amber-400 rounded-full transition-all duration-500" style="width: 20%"></div>
+        </div>
+    </div>
+
+    <!-- Papan Utama Media Interaktif -->
+    <main class="w-full max-w-5xl bg-white rounded-3xl shadow-2xl border-4 border-white/60 overflow-hidden flex-grow flex flex-col">
+
+        <!-- Banner Panduan Langkah -->
+        <div class="bg-gradient-to-r from-amber-50 via-yellow-50 to-orange-50 border-b border-amber-200/80 px-4 sm:px-6 py-3.5 flex items-start gap-3">
+            <div class="w-9 h-9 rounded-full bg-amber-500 text-white flex items-center justify-center shrink-0 font-bold shadow-sm mt-0.5">
+                👩‍🏫
+            </div>
+            <div class="flex-grow">
+                <span class="text-[11px] font-extrabold uppercase tracking-wider text-amber-700 block mb-0.5">Panduan Langkah Penyelesaian:</span>
+                <p id="guideText" class="text-sm sm:text-base text-slate-800 font-semibold leading-relaxed">
+                    Halo! Mari kita bantu menghitung harga satu gelas jus dan satu piring nasi goreng di Koperasi Sekolah menggunakan metode eliminasi!
+                </p>
+            </div>
+        </div>
+
+        <!-- Kontainer Konten Langkah Dinamis -->
+        <div id="stageContainer" class="p-4 sm:p-6 md:p-8 flex-grow flex flex-col justify-center">
+            <!-- Diisi secara dinamis oleh JavaScript -->
+        </div>
+
+        <!-- Kotak Umpan Balik Jawaban -->
+        <div id="feedbackBox" class="hidden mx-4 sm:mx-8 mb-4 p-3.5 rounded-2xl text-sm sm:text-base font-bold flex items-center gap-3 transition-all">
+            <span id="feedbackIcon" class="text-xl"></span>
+            <span id="feedbackMessage"></span>
+        </div>
+    </main>
+
+    <!-- Navigasi Bawah -->
+    <footer class="w-full max-w-5xl mt-5 mb-2 flex items-center justify-center gap-6">
+        <button id="prevBtn" onclick="prevStep()" class="group flex flex-col items-center gap-1 disabled:opacity-40 disabled:pointer-events-none transition">
+            <div class="w-14 h-14 rounded-full bg-slate-900 border-4 border-pink-200 group-hover:scale-105 group-active:scale-95 text-white flex items-center justify-center shadow-lg transition">
+                <svg class="w-7 h-7" fill="none" stroke="currentColor" stroke-width="3" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7"/>
+                </svg>
+            </div>
+            <span class="text-xs font-extrabold text-white drop-shadow">Sebelumnya</span>
+        </button>
+
+        <button onclick="resetToHome()" class="group flex flex-col items-center gap-1 transition">
+            <div class="w-16 h-16 rounded-full bg-slate-900 border-4 border-pink-200 group-hover:scale-105 group-active:scale-95 text-white flex items-center justify-center shadow-xl transition">
+                <svg class="w-8 h-8" fill="currentColor" viewBox="0 0 24 24">
+                    <path d="M10.707 2.293a1 1 0 00-1.414 0l-7 7a1 1 0 001.414 1.414L4 10.414V17a2 2 0 002 2h2a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1h2a2 2 0 002-2v-6.586l.293.293a1 1 0 001.414-1.414l-7-7z"/>
+                </svg>
+            </div>
+            <span class="text-xs font-extrabold text-white drop-shadow">Beranda / Ulang</span>
+        </button>
+
+        <button id="nextBtn" onclick="nextStep()" class="group flex flex-col items-center gap-1 disabled:opacity-40 disabled:pointer-events-none transition">
+            <div class="w-14 h-14 rounded-full bg-slate-900 border-4 border-pink-200 group-hover:scale-105 group-active:scale-95 text-white flex items-center justify-center shadow-lg transition">
+                <svg class="w-7 h-7" fill="none" stroke="currentColor" stroke-width="3" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"/>
+                </svg>
+            </div>
+            <span id="nextBtnLabel" class="text-xs font-extrabold text-white drop-shadow">Selanjutnya</span>
+        </button>
+    </footer>
+
+    <!-- Modal Pembuka -->
+    <div id="welcomeModal" class="fixed inset-0 bg-indigo-950/75 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+        <div class="bg-white rounded-3xl max-w-md w-full p-6 sm:p-8 text-center shadow-2xl border-4 border-amber-300 pop-in">
+            <div class="flex justify-center items-center gap-4 mb-4">
+                <div id="modalJusPreview" class="w-16 h-20"></div>
+                <span class="text-3xl font-black text-indigo-600">+</span>
+                <div id="modalNasgorPreview" class="w-24 h-20"></div>
+            </div>
+            <h2 class="text-2xl font-black text-indigo-950 mb-2">Koperasi Sekolah SPLDV</h2>
+            <p class="text-slate-600 text-sm sm:text-base mb-6 leading-relaxed">
+                Ayo pecahkan masalah harga <strong>Jus</strong> dan <strong>Nasi Goreng</strong> pada nota koperasi menggunakan <strong>Metode Eliminasi Saja</strong>, dilengkapi ilustrasi interaktif dan musik latar yang lembut.
+            </p>
+            <button onclick="startLearning()" class="w-full py-3.5 px-6 bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 text-white font-extrabold text-lg rounded-2xl shadow-lg hover:shadow-xl transform active:scale-95 transition flex items-center justify-center gap-2">
+                <span>🎵</span> Selesaikan contoh
+            </button>
+        </div>
+    </div>
+
+    <script>
+        // ==========================================
+        // 1. ILUSTRASI SVG KONSISTEN (JUS & NASI GORENG)
+        // ==========================================
+        function getJusSVG(sizeClass = "w-12 h-16", eliminated = false) {
+            return `
+            <div class="inline-flex flex-col items-center justify-center ${eliminated ? 'eliminated-item' : ''} transition-all">
+                <svg class="${sizeClass}" viewBox="0 0 80 110" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <!-- Sedotan hitam -->
+                    <path d="M44 45 L44 16 L60 12" stroke="#1e293b" stroke-width="4.5" stroke-linecap="round" stroke-linejoin="round"/>
+                    <!-- Badan gelas -->
+                    <path d="M20 26 L60 26 L55 98 C54.7 101.5 51.8 104 48.3 104 L31.7 104 C28.2 104 25.3 101.5 25 98 L20 26 Z" fill="#e2e8f0" fill-opacity="0.65" stroke="#64748b" stroke-width="2.5"/>
+                    <!-- Cairan jus hijau -->
+                    <path d="M22.5 34 L57.5 34 L53 96 C52.8 98.8 50.5 101 47.7 101 L32.3 101 C29.5 101 27.2 98.8 27 96 L22.5 34 Z" fill="url(#greenJuiceGrad)"/>
+                    <!-- Permukaan atas jus -->
+                    <ellipse cx="40" cy="34" rx="17.5" ry="4" fill="#a3e635"/>
+                    <!-- Bibir gelas -->
+                    <ellipse cx="40" cy="26" rx="20" ry="4.5" fill="none" stroke="#475569" stroke-width="2.5"/>
+                    <!-- Gelembung & pantulan kaca -->
+                    <circle cx="33" cy="52" r="2.5" fill="#ecfccb" fill-opacity="0.7"/>
+                    <circle cx="46" cy="68" r="3" fill="#ecfccb" fill-opacity="0.6"/>
+                    <circle cx="36" cy="82" r="2" fill="#ecfccb" fill-opacity="0.7"/>
+                    <path d="M26 40 L29 90" stroke="#ffffff" stroke-width="2.5" stroke-linecap="round" stroke-opacity="0.6"/>
+                    <defs>
+                        <linearGradient id="greenJuiceGrad" x1="40" y1="34" x2="40" y2="101" gradientUnits="userSpaceOnUse">
+                            <stop stop-color="#84cc16"/>
+                            <stop offset="1" stop-color="#4d7c0f"/>
+                        </linearGradient>
+                    </defs>
+                </svg>
+            </div>`;
+        }
+
+        function getNasgorSVG(sizeClass = "w-20 h-16", eliminated = false) {
+            return `
+            <div class="inline-flex flex-col items-center justify-center ${eliminated ? 'eliminated-item' : ''} transition-all">
+                <svg class="${sizeClass}" viewBox="0 0 130 95" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <!-- Bayangan dan alas piring -->
+                    <ellipse cx="65" cy="66" rx="58" ry="22" fill="#78350f"/>
+                    <ellipse cx="65" cy="63" rx="56" ry="20" fill="#f8fafc" stroke="#94a3b8" stroke-width="2"/>
+                    <ellipse cx="65" cy="63" rx="44" ry="14" fill="#e2e8f0"/>
+
+                    <!-- Irisan tomat merah -->
+                    <circle cx="46" cy="44" r="8" fill="#ef4444" stroke="#b91c1c" stroke-width="1.5"/>
+                    <circle cx="46" cy="44" r="4" fill="#fca5a5"/>
+                    <circle cx="57" cy="42" r="7.5" fill="#ef4444" stroke="#b91c1c" stroke-width="1.5"/>
+
+                    <!-- Irisan timun hijau -->
+                    <circle cx="88" cy="45" r="8.5" fill="#22c55e" stroke="#15803d" stroke-width="1.5"/>
+                    <circle cx="88" cy="45" r="5.5" fill="#bbf7d0"/>
+                    <circle cx="98" cy="51" r="8" fill="#22c55e" stroke="#15803d" stroke-width="1.5"/>
+                    <circle cx="98" cy="51" r="5" fill="#bbf7d0"/>
+
+                    <!-- Nasi goreng -->
+                    <path d="M24 62 C24 43 102 43 102 62 C102 72 24 72 24 62 Z" fill="url(#riceGrad)" stroke="#b45309" stroke-width="1.5"/>
+                    <circle cx="40" cy="57" r="2" fill="#dc2626"/>
+                    <circle cx="52" cy="53" r="2" fill="#16a34a"/>
+                    <circle cx="62" cy="61" r="2" fill="#d97706"/>
+                    <circle cx="48" cy="64" r="2.2" fill="#16a34a"/>
+                    <circle cx="35" cy="62" r="1.8" fill="#f59e0b"/>
+                    <circle cx="58" cy="50" r="1.8" fill="#dc2626"/>
+
+                    <!-- Kerupuk di sisi kiri -->
+                    <ellipse cx="26" cy="53" rx="8" ry="6" transform="rotate(-15 26 53)" fill="#fef3c7" stroke="#d97706" stroke-width="1.5"/>
+                    <ellipse cx="33" cy="47" rx="7" ry="5" transform="rotate(10 33 47)" fill="#fde68a" stroke="#d97706" stroke-width="1.5"/>
+
+                    <!-- Telur mata sapi -->
+                    <path d="M66 58 C64 51 76 47 86 50 C96 52 101 59 94 65 C87 70 68 66 66 58 Z" fill="#ffffff" stroke="#cbd5e1" stroke-width="1.5"/>
+                    <ellipse cx="81" cy="57" rx="8.5" ry="6" fill="#facc15" stroke="#eab308" stroke-width="1"/>
+                    <ellipse cx="79" cy="55" rx="3" ry="1.5" fill="#fef9c3"/>
+
+                    <defs>
+                        <linearGradient id="riceGrad" x1="63" y1="45" x2="63" y2="70" gradientUnits="userSpaceOnUse">
+                            <stop stop-color="#fbbf24"/>
+                            <stop offset="1" stop-color="#d97706"/>
+                        </linearGradient>
+                    </defs>
+                </svg>
+            </div>`;
+        }
+
+        // Tampilkan pratinjau ilustrasi pada modal awal
+        document.getElementById('modalJusPreview').innerHTML = getJusSVG("w-16 h-20");
+        document.getElementById('modalNasgorPreview').innerHTML = getNasgorSVG("w-24 h-20");
+
+        // ==========================================
+        // 2. BACKSOUND MUSIK LATAR LEMBUT & SFX (WEB AUDIO API)
+        // ==========================================
+        let audioCtx = null;
+        let isBgmPlaying = false;
+        let isMuted = false;
+        let bgmInterval = null;
+        let noteStep = 0;
+
+        // Melodi pentatonik lembut bervolume rendah
+        const bgmMelody = [
+            { freq: 523.25, dur: 0.35 },
+            { freq: 659.25, dur: 0.35 },
+            { freq: 783.99, dur: 0.35 },
+            { freq: 659.25, dur: 0.35 },
+            { freq: 587.33, dur: 0.35 },
+            { freq: 659.25, dur: 0.35 },
+            { freq: 523.25, dur: 0.55 },
+            { freq: 0,      dur: 0.25 },
+            { freq: 587.33, dur: 0.35 },
+            { freq: 783.99, dur: 0.35 },
+            { freq: 880.00, dur: 0.35 },
+            { freq: 783.99, dur: 0.35 },
+            { freq: 659.25, dur: 0.35 },
+            { freq: 587.33, dur: 0.35 },
+            { freq: 523.25, dur: 0.60 },
+            { freq: 0,      dur: 0.30 }
+        ];
+
+        // Nada bas halus pengiring
+        const bgmBass = [
+            261.63, 0, 196.00, 0,
+            293.66, 0, 261.63, 0,
+            196.00, 0, 220.00, 0,
+            196.00, 0, 261.63, 0
+        ];
+
+        function initAudioContext() {
+            try {
+                if (!audioCtx) {
+                    const AudioContextClass = window.AudioContext || window.webkitAudioContext;
+                    audioCtx = new AudioContextClass();
+                }
+                if (audioCtx.state === 'suspended') {
+                    audioCtx.resume();
+                }
+            } catch (err) {
+                console.warn('Web Audio API tidak tersedia:', err);
+            }
+        }
+
+        function playSoftTone(freq, duration, volume = 0.032, type = 'sine') {
+            if (!audioCtx || isMuted || freq <= 0) return;
+            try {
+                const now = audioCtx.currentTime;
+                const osc = audioCtx.createOscillator();
+                const gain = audioCtx.createGain();
+
+                osc.type = type;
+                osc.frequency.setValueAtTime(freq, now);
+
+                gain.gain.setValueAtTime(0.0001, now);
+                gain.gain.exponentialRampToValueAtTime(volume, now + 0.04);
+                gain.gain.exponentialRampToValueAtTime(0.0001, now + duration);
+
+                osc.connect(gain);
+                gain.connect(audioCtx.destination);
+
+                osc.start(now);
+                osc.stop(now + duration + 0.05);
+            } catch (err) {
+                console.warn('Gagal memutar nada:', err);
+            }
+        }
+
+        function startBacksound() {
+            initAudioContext();
+            if (isBgmPlaying) return;
+            isBgmPlaying = true;
+            updateBgmUI();
+
+            bgmInterval = setInterval(() => {
+                if (isMuted || !isBgmPlaying) return;
+                const currentNote = bgmMelody[noteStep % bgmMelody.length];
+                const bassFreq = bgmBass[noteStep % bgmBass.length];
+
+                if (currentNote.freq > 0) {
+                    playSoftTone(currentNote.freq, currentNote.dur, 0.03, 'sine');
+                }
+                if (bassFreq > 0) {
+                    playSoftTone(bassFreq, 0.45, 0.016, 'triangle');
+                }
+                noteStep++;
+            }, 460);
+        }
+
+        function toggleBacksound() {
+            initAudioContext();
+            isMuted = !isMuted;
+            if (!isMuted && !isBgmPlaying) {
+                startBacksound();
+            }
+            updateBgmUI();
+            if (!isMuted) {
+                playSfx('click');
+            }
+        }
+
+        function updateBgmUI() {
+            const btn = document.getElementById('bgmToggleBtn');
+            const btnIcon = document.getElementById('bgmBtnIcon');
+            const btnText = document.getElementById('bgmBtnText');
+            const pulse = document.getElementById('musicPulse');
+            const icon = document.getElementById('musicIcon');
+
+            if (!isMuted && isBgmPlaying) {
+                btn.classList.remove('bg-slate-200', 'text-slate-700', 'hover:bg-slate-300');
+                btn.classList.add('bg-indigo-600', 'text-white', 'hover:bg-indigo-700');
+                btnIcon.textContent = '🔊';
+                btnText.textContent = 'Backsound Nyala';
+                pulse.classList.remove('hidden');
+                icon.textContent = '🎵';
+            } else {
+                btn.classList.remove('bg-indigo-600', 'text-white', 'hover:bg-indigo-700');
+                btn.classList.add('bg-slate-200', 'text-slate-700', 'hover:bg-slate-300');
+                btnIcon.textContent = '🔇';
+                btnText.textContent = 'Backsound Mati';
+                pulse.classList.add('hidden');
+                icon.textContent = '🎶';
+            }
+        }
+
+        // Efek suara interaksi halus (klik, benar, salah, selesai)
+        function playSfx(type) {
+            if (isMuted) return;
+            initAudioContext();
+
+            if (type === 'click') {
+                playSoftTone(600, 0.09, 0.028, 'sine');
+            } else if (type === 'success') {
+                playSoftTone(523.25, 0.14, 0.045, 'triangle');
+                setTimeout(() => playSoftTone(659.25, 0.14, 0.045, 'triangle'), 100);
+                setTimeout(() => playSoftTone(783.99, 0.28, 0.05, 'triangle'), 200);
+            } else if (type === 'error') {
+                playSoftTone(310, 0.16, 0.04, 'sawtooth');
+                setTimeout(() => playSoftTone(260, 0.22, 0.04, 'sawtooth'), 130);
+            } else if (type === 'fanfare') {
+                const notes = [523.25, 659.25, 783.99, 1046.50];
+                notes.forEach((f, idx) => {
+                    setTimeout(() => playSoftTone(f, 0.3, 0.05, 'triangle'), idx * 120);
+                });
+            }
+        }
+
+        function setGuideText(text) {
+            document.getElementById('guideText').textContent = text;
+        }
+
+        // ==========================================
+        // 3. MANAJEMEN LANGKAH & STATUS INTERAKSI
+        // ==========================================
+        let currentStep = 0;
+        const totalSteps = 5;
+
+        let stepState = {
+            step1Solved: false,
+            step2OperatorChosen: false,
+            step3MultiplierChosen: false,
+            step3Eliminated: false
+        };
+
+        const stepTitles = [
+            "Langkah 1 dari 5: Pengenalan Soal & Nota",
+            "Langkah 2 dari 5: Pemisalan & Model Matematika",
+            "Langkah 3 dari 5: Eliminasi Nasi Goreng (y) untuk Mencari Jus (x)",
+            "Langkah 4 dari 5: Eliminasi Jus (x) untuk Mencari Nasi Goreng (y)",
+            "Langkah 5 dari 5: Kesimpulan & Pembuktian Harga"
+        ];
+
+        function showFeedback(type, message) {
+            const box = document.getElementById('feedbackBox');
+            const icon = document.getElementById('feedbackIcon');
+            const msg = document.getElementById('feedbackMessage');
+
+            box.classList.remove('hidden', 'bg-emerald-100', 'text-emerald-900', 'border-emerald-300', 'bg-rose-100', 'text-rose-900', 'border-rose-300', 'shake-error');
+            box.classList.add('border-2');
+
+            if (type === 'success') {
+                box.classList.add('bg-emerald-100', 'text-emerald-900', 'border-emerald-300', 'pop-in');
+                icon.textContent = '🎉';
+            } else {
+                box.classList.add('bg-rose-100', 'text-rose-900', 'border-rose-300', 'shake-error');
+                icon.textContent = '💡';
+            }
+            msg.textContent = message;
+        }
+
+        function hideFeedback() {
+            document.getElementById('feedbackBox').classList.add('hidden');
+        }
+
+        function startLearning() {
+            document.getElementById('welcomeModal').classList.add('hidden');
+            startBacksound();
+            playSfx('success');
+            renderStep(0);
+        }
+
+        function resetToHome() {
+            playSfx('click');
+            stepState = {
+                step1Solved: false,
+                step2OperatorChosen: false,
+                step3MultiplierChosen: false,
+                step3Eliminated: false
+            };
+            renderStep(0);
+        }
+
+        function nextStep() {
+            playSfx('click');
+            if (currentStep < totalSteps - 1) {
+                renderStep(currentStep + 1);
+            } else {
+                resetToHome();
+            }
+        }
+
+        function prevStep() {
+            playSfx('click');
+            if (currentStep > 0) {
+                renderStep(currentStep - 1);
+            }
+        }
+
+        function updateNavigationUI() {
+            document.getElementById('stepBadge').textContent = stepTitles[currentStep];
+            const pct = Math.round(((currentStep + 1) / totalSteps) * 100);
+            document.getElementById('progressPercent').textContent = pct + '%';
+            document.getElementById('progressBar').style.width = pct + '%';
+
+            const prevBtn = document.getElementById('prevBtn');
+            const nextBtn = document.getElementById('nextBtn');
+            const nextLabel = document.getElementById('nextBtnLabel');
+
+            prevBtn.disabled = (currentStep === 0);
+
+            let canProceed = true;
+            if (currentStep === 1 && !stepState.step1Solved) canProceed = false;
+            if (currentStep === 2 && !stepState.step2OperatorChosen) canProceed = false;
+            if (currentStep === 3 && !stepState.step3Eliminated) canProceed = false;
+
+            nextBtn.disabled = !canProceed;
+            nextLabel.textContent = (currentStep === totalSteps - 1) ? "Ulangi Dari Awal" : "Selanjutnya";
+        }
+
+        // ==========================================
+        // 4. RENDER SETIAP LANGKAH
+        // ==========================================
+        function renderStep(stepIndex) {
+            currentStep = stepIndex;
+            hideFeedback();
+            const stage = document.getElementById('stageContainer');
+
+            if (stepIndex === 0) {
+                // LANGKAH 1: PENGENALAN SOAL & NOTA
+                stage.innerHTML = `
+                    <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 items-center">
+                        <div class="lg:col-span-5 bg-indigo-50/80 rounded-2xl p-5 border-2 border-indigo-100 flex flex-col justify-between">
+                            <div>
+                                <span class="inline-block px-3 py-1 bg-indigo-600 text-white text-xs font-extrabold rounded-full mb-3">🏪 KOPERASI SEKOLAH</span>
+                                <h2 class="text-xl font-black text-indigo-950 mb-2">Berapa Harga Satu Jus &amp; Satu Nasi Goreng?</h2>
+                                <p class="text-sm text-slate-700 leading-relaxed mb-4">
+                                    Dua orang siswa berbelanja di Koperasi Sekolah dan mendapatkan dua nota pembayaran seperti di samping. Mari kita cari harga masing-masing item dengan <strong>Metode Eliminasi Saja</strong>!
+                                </p>
+                            </div>
+                            <div class="bg-amber-100/80 border border-amber-300 rounded-xl p-3.5 text-xs sm:text-sm text-amber-950 font-bold">
+                                🎯 Tujuan: Menemukan harga <strong>1 Jus</strong> dan harga <strong>1 Nasi Goreng</strong> tanpa substitusi (murni eliminasi).
+                            </div>
+                        </div>
+
+                        <div class="lg:col-span-7 grid grid-cols-1 sm:grid-cols-2 gap-4">
+                            <!-- Nota 1 -->
+                            <div class="bg-slate-50 rounded-2xl p-4 border-2 border-slate-200 shadow-md relative transform -rotate-1 hover:rotate-0 transition">
+                                <div class="text-center border-b-2 border-dashed border-slate-300 pb-2 mb-3">
+                                    <span class="text-xs font-black tracking-widest text-slate-500 uppercase">NOTA PEMBELIAN 1</span>
+                                </div>
+                                <div class="space-y-3 mb-4">
+                                    <div class="flex items-center justify-between bg-white p-2.5 rounded-xl border border-slate-100">
+                                        <div class="flex items-center gap-1">
+                                            ${getJusSVG("w-9 h-12")}
+                                            ${getJusSVG("w-9 h-12")}
+                                        </div>
+                                        <span class="font-extrabold text-slate-800 text-sm sm:text-base">2 Jus</span>
+                                    </div>
+                                    <div class="flex items-center justify-between bg-white p-2.5 rounded-xl border border-slate-100">
+                                        <div>${getNasgorSVG("w-16 h-12")}</div>
+                                        <span class="font-extrabold text-slate-800 text-sm sm:text-base">1 Nasi Goreng</span>
+                                    </div>
+                                </div>
+                                <div class="border-t-2 border-dashed border-slate-300 pt-2.5 flex justify-between items-center">
+                                    <span class="text-xs font-bold text-slate-500">TOTAL BAYAR</span>
+                                    <span class="text-lg sm:text-xl font-black text-amber-600">Rp 35.000</span>
+                                </div>
+                            </div>
+
+                            <!-- Nota 2 -->
+                            <div class="bg-slate-50 rounded-2xl p-4 border-2 border-slate-200 shadow-md relative transform rotate-1 hover:rotate-0 transition">
+                                <div class="text-center border-b-2 border-dashed border-slate-300 pb-2 mb-3">
+                                    <span class="text-xs font-black tracking-widest text-slate-500 uppercase">NOTA PEMBELIAN 2</span>
+                                </div>
+                                <div class="space-y-3 mb-4">
+                                    <div class="flex items-center justify-between bg-white p-2.5 rounded-xl border border-slate-100">
+                                        <div>${getJusSVG("w-9 h-12")}</div>
+                                        <span class="font-extrabold text-slate-800 text-sm sm:text-base">1 Jus</span>
+                                    </div>
+                                    <div class="flex items-center justify-between bg-white p-2.5 rounded-xl border border-slate-100">
+                                        <div>${getNasgorSVG("w-16 h-12")}</div>
+                                        <span class="font-extrabold text-slate-800 text-sm sm:text-base">1 Nasi Goreng</span>
+                                    </div>
+                                </div>
+                                <div class="border-t-2 border-dashed border-slate-300 pt-2.5 flex justify-between items-center">
+                                    <span class="text-xs font-bold text-slate-500">TOTAL BAYAR</span>
+                                    <span class="text-lg sm:text-xl font-black text-amber-600">Rp 25.000</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                `;
+                setGuideText("Perhatikan dua nota belanja dari Koperasi Sekolah ini. Pada Nota 1, 2 gelas jus + 1 piring nasi goreng = Rp 35.000. Pada Nota 2, 1 gelas jus + 1 piring nasi goreng = Rp 25.000. Klik 'Selanjutnya' untuk membuat pemisalan!");
+
+            } else if (stepIndex === 1) {
+                // LANGKAH 2: PEMISALAN & MODEL MATEMATIKA
+                stage.innerHTML = `
+                    <div class="space-y-6">
+                        <div class="bg-indigo-50 rounded-2xl p-4 sm:p-5 border-2 border-indigo-100">
+                            <h3 class="text-center text-sm sm:text-base font-black text-indigo-900 uppercase tracking-wide mb-4">1. Kita Buat Pemisalan Variabel</h3>
+                            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 max-w-2xl mx-auto">
+                                <div class="bg-white rounded-2xl p-3.5 shadow-sm border border-indigo-100 flex items-center gap-4">
+                                    ${getJusSVG("w-12 h-16")}
+                                    <div>
+                                        <span class="text-3xl font-black text-emerald-600 italic font-serif">x</span>
+                                        <p class="text-xs sm:text-sm font-bold text-slate-700">= Harga 1 Gelas Jus</p>
+                                    </div>
+                                </div>
+                                <div class="bg-white rounded-2xl p-3.5 shadow-sm border border-indigo-100 flex items-center gap-4">
+                                    ${getNasgorSVG("w-20 h-16")}
+                                    <div>
+                                        <span class="text-3xl font-black text-amber-600 italic font-serif">y</span>
+                                        <p class="text-xs sm:text-sm font-bold text-slate-700">= Harga 1 Piring Nasi Goreng</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="bg-white rounded-2xl p-4 sm:p-5 border-2 border-slate-200">
+                            <h3 class="text-center text-sm sm:text-base font-black text-slate-800 mb-4">
+                                2. Pilih Model Matematika yang Tepat dari Kedua Nota!
+                            </h3>
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-4 items-center mb-4">
+                                <div class="p-3 bg-slate-50 rounded-xl border border-slate-200 flex items-center justify-between">
+                                    <div class="flex items-center gap-1">
+                                        ${getJusSVG("w-8 h-10")} ${getJusSVG("w-8 h-10")} <span class="font-bold text-slate-400">+</span> ${getNasgorSVG("w-14 h-10")}
+                                    </div>
+                                    <span class="font-black text-indigo-700 text-sm sm:text-base">= 35.000</span>
+                                </div>
+                                <div class="p-3 bg-slate-50 rounded-xl border border-slate-200 flex items-center justify-between">
+                                    <div class="flex items-center gap-1">
+                                        ${getJusSVG("w-8 h-10")} <span class="font-bold text-slate-400">+</span> ${getNasgorSVG("w-14 h-10")}
+                                    </div>
+                                    <span class="font-black text-indigo-700 text-sm sm:text-base">= 25.000</span>
+                                </div>
+                            </div>
+
+                            <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                                <button onclick="checkModelChoice(false)" class="p-3.5 rounded-xl border-2 border-slate-200 hover:border-indigo-400 hover:bg-indigo-50 transition text-center font-bold text-slate-700">
+                                    <div class="text-sm sm:text-base font-serif">x + 2y = 35.000</div>
+                                    <div class="text-sm sm:text-base font-serif">x + y = 25.000</div>
+                                </button>
+                                <button id="correctModelBtn" onclick="checkModelChoice(true)" class="p-3.5 rounded-xl border-2 ${stepState.step1Solved ? 'border-emerald-500 bg-emerald-50 ring-2 ring-emerald-300' : 'border-slate-200 hover:border-indigo-400 hover:bg-indigo-50'} transition text-center font-bold text-slate-800">
+                                    <div class="text-sm sm:text-base font-serif">2x + y = 35.000</div>
+                                    <div class="text-sm sm:text-base font-serif">x + y = 25.000</div>
+                                </button>
+                                <button onclick="checkModelChoice(false)" class="p-3.5 rounded-xl border-2 border-slate-200 hover:border-indigo-400 hover:bg-indigo-50 transition text-center font-bold text-slate-700">
+                                    <div class="text-sm sm:text-base font-serif">2x + 2y = 35.000</div>
+                                    <div class="text-sm sm:text-base font-serif">x + y = 25.000</div>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                `;
+                if (stepState.step1Solved) {
+                    showFeedback('success', 'Tepat sekali! Persamaan 1 adalah 2x + y = 35.000 dan Persamaan 2 adalah x + y = 25.000.');
+                }
+                setGuideText("Pertama, kita misalkan harga 1 gelas jus = x, dan harga 1 piring nasi goreng = y. Pilih pasangan persamaan matematika yang paling tepat mewakili kedua nota di bawah ini!");
+
+            } else if (stepIndex === 2) {
+                // LANGKAH 3: ELIMINASI VARIABEL Y (NASI GORENG) UNTUK MENCARI X (JUS)
+                const isElim = stepState.step2OperatorChosen;
+                stage.innerHTML = `
+                    <div class="space-y-5">
+                        <div class="flex flex-wrap items-center justify-between gap-2 bg-emerald-50 px-4 py-2.5 rounded-xl border border-emerald-200">
+                            <span class="text-xs sm:text-sm font-extrabold text-emerald-900">TAHAP 1: Eliminasi Variabel <i>y</i> (Nasi Goreng) untuk mencari <i>x</i> (Jus)</span>
+                            <span class="text-xs font-bold bg-emerald-600 text-white px-2.5 py-0.5 rounded-full">Koefisien y sudah sama (= 1)</span>
+                        </div>
+
+                        <div class="bg-slate-50 rounded-2xl p-4 sm:p-6 border-2 border-slate-200 max-w-3xl mx-auto">
+                            <!-- Persamaan 1 -->
+                            <div class="grid grid-cols-12 items-center gap-2 py-2">
+                                <div class="col-span-5 flex items-center justify-center gap-1 bg-white p-2 rounded-xl border border-slate-200">
+                                    ${getJusSVG("w-9 h-12")}
+                                    ${getJusSVG("w-9 h-12", isElim)}
+                                    <span class="text-xs font-black text-emerald-700 ml-1">(2x)</span>
+                                </div>
+                                <div class="col-span-1 text-center font-black text-slate-400">+</div>
+                                <div class="col-span-3 flex items-center justify-center bg-white p-2 rounded-xl border border-slate-200">
+                                    ${getNasgorSVG("w-16 h-12", isElim)}
+                                    <span class="text-xs font-black text-amber-700 ml-1">(y)</span>
+                                </div>
+                                <div class="col-span-3 text-right font-black text-base sm:text-lg text-slate-800 pr-2">
+                                    = 35.000
+                                </div>
+                            </div>
+
+                            <!-- Persamaan 2 -->
+                            <div class="grid grid-cols-12 items-center gap-2 py-2">
+                                <div class="col-span-5 flex items-center justify-center gap-1 bg-white p-2 rounded-xl border border-slate-200">
+                                    ${getJusSVG("w-9 h-12", isElim)}
+                                    <span class="text-xs font-black text-emerald-700 ml-1">(x)</span>
+                                </div>
+                                <div class="col-span-1 text-center font-black text-slate-400">+</div>
+                                <div class="col-span-3 flex items-center justify-center bg-white p-2 rounded-xl border border-slate-200">
+                                    ${getNasgorSVG("w-16 h-12", isElim)}
+                                    <span class="text-xs font-black text-amber-700 ml-1">(y)</span>
+                                </div>
+                                <div class="col-span-3 text-right font-black text-base sm:text-lg text-slate-800 pr-2">
+                                    = 25.000
+                                </div>
+                            </div>
+
+                            <!-- Garis Operasi -->
+                            <div class="flex items-center gap-3 my-2">
+                                <div class="flex-grow h-1 bg-slate-800 rounded-full"></div>
+                                <div id="opBadge1" class="w-11 h-11 rounded-xl ${isElim ? 'bg-emerald-600 text-white' : 'bg-amber-400 text-slate-900 animate-bounce'} font-black text-2xl flex items-center justify-center shadow-md">
+                                    ${isElim ? '−' : '?'}
+                                </div>
+                            </div>
+
+                            ${!isElim ? `
+                                <div class="mt-4 text-center">
+                                    <p class="text-sm font-extrabold text-slate-700 mb-3">
+                                        Agar <strong>1 Nasi Goreng (y)</strong> habis tereliminasi, tanda operasi apa yang harus kita gunakan?
+                                    </p>
+                                    <div class="flex justify-center gap-4">
+                                        <button onclick="chooseElimYOperator('+')" class="px-6 py-2.5 bg-white hover:bg-indigo-50 border-2 border-slate-300 rounded-xl font-black text-xl text-slate-800 shadow-sm active:scale-95 transition">
+                                            + (Tambah)
+                                        </button>
+                                        <button onclick="chooseElimYOperator('-')" class="px-6 py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl font-black text-xl shadow-md active:scale-95 transition">
+                                            − (Kurang)
+                                        </button>
+                                    </div>
+                                </div>
+                            ` : `
+                                <div class="grid grid-cols-12 items-center gap-2 pt-2 pop-in">
+                                    <div class="col-span-5 flex items-center justify-center gap-2 bg-emerald-100 p-2.5 rounded-xl border-2 border-emerald-400">
+                                        ${getJusSVG("w-10 h-14")}
+                                        <span class="text-sm sm:text-base font-black text-emerald-900">1 Jus (x)</span>
+                                    </div>
+                                    <div class="col-span-1 text-center font-black text-slate-400">+</div>
+                                    <div class="col-span-3 text-center bg-slate-200/70 p-2.5 rounded-xl text-xs sm:text-sm font-bold text-slate-500">
+                                        0 (Habis!)
+                                    </div>
+                                    <div class="col-span-3 text-right font-black text-lg sm:text-xl text-emerald-700 pr-2">
+                                        = 10.000
+                                    </div>
+                                </div>
+                                <div class="mt-3 text-center bg-emerald-600 text-white py-2 px-4 rounded-xl font-extrabold text-sm sm:text-base shadow">
+                                    ✅ Didapat: x = Rp 10.000 (Harga 1 Gelas Jus adalah Rp 10.000)
+                                </div>
+                            `}
+                        </div>
+                    </div>
+                `;
+                if (!isElim) {
+                    setGuideText("Sekarang kita gunakan metode eliminasi! Perhatikan gambar nasi goreng (variabel y) pada kedua persamaan jumlahnya sudah sama (= 1). Pilih tanda operasi (+ atau −) agar nasi goreng habis tereliminasi!");
+                } else {
+                    showFeedback('success', 'Hebat! Dengan pengurangan, 1 Nasi Goreng habis dicoret, 2 Jus dikurangi 1 Jus tersisa 1 Jus, dan 35.000 dikurangi 25.000 sama dengan 10.000!');
+                }
+
+            } else if (stepIndex === 3) {
+                // LANGKAH 4: ELIMINASI VARIABEL X (JUS) UNTUK MENCARI Y (NASI GORENG) - MURNI ELIMINASI
+                const multDone = stepState.step3MultiplierChosen;
+                const elimDone = stepState.step3Eliminated;
+
+                stage.innerHTML = `
+                    <div class="space-y-4">
+                        <div class="flex flex-wrap items-center justify-between gap-2 bg-amber-50 px-4 py-2.5 rounded-xl border border-amber-200">
+                            <span class="text-xs sm:text-sm font-extrabold text-amber-950">TAHAP 2 (Murni Eliminasi): Eliminasi Variabel <i>x</i> (Jus) untuk mencari <i>y</i> (Nasi Goreng)</span>
+                            <span class="text-xs font-bold bg-amber-500 text-white px-2.5 py-0.5 rounded-full">Samakan Koefisien x!</span>
+                        </div>
+
+                        ${!multDone ? `
+                            <div class="bg-slate-50 rounded-2xl p-4 sm:p-6 border-2 border-slate-200 max-w-3xl mx-auto">
+                                <p class="text-sm font-bold text-slate-700 mb-4 text-center">
+                                    Persamaan 1 memiliki <strong>2 Jus (2x)</strong>, sedangkan Persamaan 2 hanya memiliki <strong>1 Jus (x)</strong>. Agar jumlah Jus sama untuk dieliminasi, Persamaan 2 harus kita kalikan berapa?
+                                </p>
+                                <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-5">
+                                    <div class="bg-white p-3 rounded-xl border border-slate-200 flex items-center justify-between">
+                                        <div class="flex items-center gap-1">${getJusSVG("w-8 h-10")}${getJusSVG("w-8 h-10")} + ${getNasgorSVG("w-14 h-10")}</div>
+                                        <span class="font-black text-slate-800 text-sm">2x + y = 35.000</span>
+                                    </div>
+                                    <div class="bg-amber-50 p-3 rounded-xl border-2 border-amber-300 flex items-center justify-between">
+                                        <div class="flex items-center gap-1">${getJusSVG("w-8 h-10")} + ${getNasgorSVG("w-14 h-10")}</div>
+                                        <span class="font-black text-amber-900 text-sm">x + y = 25.000 <span class="text-rose-600">(× ?)</span></span>
+                                    </div>
+                                </div>
+                                <div class="flex justify-center gap-3">
+                                    <button onclick="chooseMultiplier(1)" class="px-5 py-2.5 bg-white hover:bg-indigo-50 border-2 border-slate-300 rounded-xl font-black text-base text-slate-800 active:scale-95 transition">Dikali 1</button>
+                                    <button onclick="chooseMultiplier(2)" class="px-5 py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl font-black text-base shadow-md active:scale-95 transition">Dikali 2</button>
+                                    <button onclick="chooseMultiplier(3)" class="px-5 py-2.5 bg-white hover:bg-indigo-50 border-2 border-slate-300 rounded-xl font-black text-base text-slate-800 active:scale-95 transition">Dikali 3</button>
+                                </div>
+                            </div>
+                        ` : `
+                            <div class="bg-slate-50 rounded-2xl p-4 sm:p-5 border-2 border-slate-200 max-w-3xl mx-auto pop-in">
+                                <!-- Persamaan 2 yang dikali 2 -->
+                                <div class="grid grid-cols-12 items-center gap-2 py-2">
+                                    <div class="col-span-5 flex items-center justify-center gap-1 bg-white p-2 rounded-xl border border-slate-200">
+                                        ${getJusSVG("w-8 h-11", elimDone)}
+                                        ${getJusSVG("w-8 h-11", elimDone)}
+                                        <span class="text-xs font-black text-emerald-700 ml-1">(2x)</span>
+                                    </div>
+                                    <div class="col-span-1 text-center font-black text-slate-400">+</div>
+                                    <div class="col-span-3 flex items-center justify-center gap-0.5 bg-white p-2 rounded-xl border border-slate-200">
+                                        ${getNasgorSVG("w-12 h-10")}
+                                        ${getNasgorSVG("w-12 h-10", elimDone)}
+                                        <span class="text-xs font-black text-amber-700">(2y)</span>
+                                    </div>
+                                    <div class="col-span-3 text-right font-black text-sm sm:text-base text-slate-800 pr-2">
+                                        = 50.000
+                                    </div>
+                                </div>
+
+                                <!-- Persamaan 1 -->
+                                <div class="grid grid-cols-12 items-center gap-2 py-2">
+                                    <div class="col-span-5 flex items-center justify-center gap-1 bg-white p-2 rounded-xl border border-slate-200">
+                                        ${getJusSVG("w-8 h-11", elimDone)}
+                                        ${getJusSVG("w-8 h-11", elimDone)}
+                                        <span class="text-xs font-black text-emerald-700 ml-1">(2x)</span>
+                                    </div>
+                                    <div class="col-span-1 text-center font-black text-slate-400">+</div>
+                                    <div class="col-span-3 flex items-center justify-center bg-white p-2 rounded-xl border border-slate-200">
+                                        ${getNasgorSVG("w-14 h-10", elimDone)}
+                                        <span class="text-xs font-black text-amber-700 ml-1">(y)</span>
+                                    </div>
+                                    <div class="col-span-3 text-right font-black text-sm sm:text-base text-slate-800 pr-2">
+                                        = 35.000
+                                    </div>
+                                </div>
+
+                                <!-- Garis Pengurangan -->
+                                <div class="flex items-center gap-3 my-2">
+                                    <div class="flex-grow h-1 bg-slate-800 rounded-full"></div>
+                                    <div class="w-10 h-10 rounded-xl bg-indigo-600 text-white font-black text-xl flex items-center justify-center shadow">−</div>
+                                </div>
+
+                                ${!elimDone ? `
+                                    <div class="text-center mt-3">
+                                        <p class="text-sm font-bold text-slate-700 mb-3">
+                                            Sekarang jumlah Jus sudah sama-sama <strong>2 gelas (2x)</strong>! Klik tombol di bawah untuk mengurangkan dan mengeliminasi Jus:
+                                        </p>
+                                        <button onclick="executeEliminateX()" class="px-6 py-2.5 bg-amber-500 hover:bg-amber-600 text-white font-black rounded-xl shadow-md active:scale-95 transition">
+                                            ✂️ Kurangkan &amp; Eliminasi 2 Jus (2x)
+                                        </button>
+                                    </div>
+                                ` : `
+                                    <div class="grid grid-cols-12 items-center gap-2 pt-2 pop-in">
+                                        <div class="col-span-5 text-center bg-slate-200/70 p-2.5 rounded-xl text-xs sm:text-sm font-bold text-slate-500">
+                                            0 (2 Jus Habis!)
+                                        </div>
+                                        <div class="col-span-1 text-center font-black text-slate-400">+</div>
+                                        <div class="col-span-3 flex items-center justify-center gap-1 bg-amber-100 p-2 rounded-xl border-2 border-amber-400">
+                                            ${getNasgorSVG("w-14 h-11")}
+                                            <span class="text-xs sm:text-sm font-black text-amber-900">(y)</span>
+                                        </div>
+                                        <div class="col-span-3 text-right font-black text-lg sm:text-xl text-amber-700 pr-2">
+                                            = 15.000
+                                        </div>
+                                    </div>
+                                    <div class="mt-3 text-center bg-amber-500 text-white py-2 px-4 rounded-xl font-extrabold text-sm sm:text-base shadow">
+                                        ✅ Didapat: y = Rp 15.000 (Harga 1 Piring Nasi Goreng adalah Rp 15.000)
+                                    </div>
+                                `}
+                            </div>
+                        `}
+                    </div>
+                `;
+
+                if (!multDone) {
+                    setGuideText("Karena kita memakai metode eliminasi saja, sekarang kita harus mengeliminasi variabel x (Jus). Persamaan 1 memiliki 2 Jus, sedangkan Persamaan 2 hanya 1 Jus. Agar sama, Persamaan 2 harus kita kalikan berapa?");
+                } else if (!elimDone) {
+                    showFeedback('success', 'Benar! Setelah persamaan kedua dikali 2, kita mendapat 2x + 2y = 50.000.');
+                    setGuideText("Bagus sekali! Setelah dikali 2, Persamaan 2 menjadi 2x + 2y = 50.000. Sekarang klik tombol kurangkan untuk mengeliminasi 2 gelas jus!");
+                } else {
+                    showFeedback('success', 'Luar biasa! 2 Jus habis dicoret, 2 Nasi Goreng dikurangi 1 Nasi Goreng tersisa 1 Nasi Goreng, dan 50.000 dikurangi 35.000 sama dengan 15.000!');
+                }
+
+            } else if (stepIndex === 4) {
+                // LANGKAH 5: KESIMPULAN & PEMBUKTIAN HARGA
+                stage.innerHTML = `
+                    <div class="space-y-6 text-center">
+                        <div class="inline-block px-4 py-1.5 bg-emerald-100 text-emerald-800 rounded-full text-xs sm:text-sm font-black">
+                            🏆 PENYELESAIAN METODE ELIMINASI SELESAI!
+                        </div>
+
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-5 max-w-2xl mx-auto">
+                            <div class="bg-gradient-to-b from-emerald-50 to-white p-5 rounded-3xl border-2 border-emerald-300 shadow-md animate-float">
+                                <div class="flex justify-center mb-2">${getJusSVG("w-16 h-20")}</div>
+                                <span class="text-xs font-extrabold uppercase tracking-wider text-emerald-600">Harga 1 Gelas Jus (x)</span>
+                                <div class="text-2xl sm:text-3xl font-black text-slate-900 mt-1">Rp 10.000</div>
+                            </div>
+
+                            <div class="bg-gradient-to-b from-amber-50 to-white p-5 rounded-3xl border-2 border-amber-300 shadow-md animate-float" style="animation-delay: 0.4s;">
+                                <div class="flex justify-center mb-2">${getNasgorSVG("w-24 h-20")}</div>
+                                <span class="text-xs font-extrabold uppercase tracking-wider text-amber-600">Harga 1 Nasi Goreng (y)</span>
+                                <div class="text-2xl sm:text-3xl font-black text-slate-900 mt-1">Rp 15.000</div>
+                            </div>
+                        </div>
+
+                        <div class="bg-indigo-50/90 rounded-2xl p-4 sm:p-5 border border-indigo-200 max-w-3xl mx-auto text-left">
+                            <h4 class="text-sm font-black text-indigo-950 mb-3 flex items-center gap-2">
+                                <span>🔍</span> Pembuktian pada Kedua Nota Koperasi:
+                            </h4>
+                            <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs sm:text-sm">
+                                <div class="bg-white p-3 rounded-xl border border-indigo-100">
+                                    <div class="font-extrabold text-slate-700 mb-1">Nota 1: 2 Jus + 1 Nasi Goreng</div>
+                                    <div class="text-slate-600">= (2 × Rp 10.000) + Rp 15.000</div>
+                                    <div class="text-emerald-600 font-black mt-0.5">= Rp 35.000 (Terbukti Cocok! ✓)</div>
+                                </div>
+                                <div class="bg-white p-3 rounded-xl border border-indigo-100">
+                                    <div class="font-extrabold text-slate-700 mb-1">Nota 2: 1 Jus + 1 Nasi Goreng</div>
+                                    <div class="text-slate-600">= Rp 10.000 + Rp 15.000</div>
+                                    <div class="text-emerald-600 font-black mt-0.5">= Rp 25.000 (Terbukti Cocok! ✓)</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                `;
+                launchConfetti();
+                playSfx('fanfare');
+                setGuideText("Selamat! Kita telah menemukan jawabannya menggunakan metode eliminasi saja. Harga 1 gelas jus = Rp 10.000, dan harga 1 piring nasi goreng = Rp 15.000. Keduanya terbukti cocok dengan total pembayaran pada kedua nota!");
+            }
+
+            updateNavigationUI();
+        }
+
+        // ==========================================
+        // 5. PENANGAN INTERAKSI PENGGUNA
+        // ==========================================
+        function checkModelChoice(isCorrect) {
+            if (isCorrect) {
+                playSfx('success');
+                stepState.step1Solved = true;
+                renderStep(1);
+                setGuideText("Tepat sekali! 2 Jus + 1 Nasi Goreng = 35.000 ditulis (2x + y = 35.000), dan 1 Jus + 1 Nasi Goreng = 25.000 ditulis (x + y = 25.000). Silakan klik 'Selanjutnya'!");
+            } else {
+                playSfx('error');
+                showFeedback('error', 'Kurang tepat! Perhatikan jumlah gambarnya: Nota 1 memiliki 2 Jus (2x) dan 1 Nasi Goreng (y). Coba pilih lagi!');
+                setGuideText("Kurang tepat. Coba perhatikan kembali jumlah gelas jus dan piring nasi goreng pada Nota 1.");
+            }
+        }
+
+        function chooseElimYOperator(op) {
+            if (op === '-') {
+                playSfx('success');
+                stepState.step2OperatorChosen = true;
+                renderStep(2);
+                setGuideText("Benar sekali! Dengan tanda kurang (−), 1 Nasi Goreng dikurangi 1 Nasi Goreng menjadi habis. 2 Jus − 1 Jus = 1 Jus, dan 35.000 − 25.000 = 10.000. Jadi harga 1 Jus adalah Rp 10.000!");
+            } else {
+                playSfx('error');
+                showFeedback('error', 'Kalau ditambah, y + y menjadi 2y (Nasi Goreng tidak hilang). Coba pilih tanda kurang (−)!');
+                setGuideText("Kalau ditambah, nasi gorengnya malah bertambah menjadi dua. Pilih tanda kurang (−) agar nasi gorengnya habis.");
+            }
+        }
+
+        function chooseMultiplier(num) {
+            if (num === 2) {
+                playSfx('success');
+                stepState.step3MultiplierChosen = true;
+                renderStep(3);
+            } else {
+                playSfx('error');
+                showFeedback('error', 'Agar 1 Jus (x) menjadi 2 Jus (2x) seperti Persamaan 1, kita perlu mengalikannya dengan 2!');
+                setGuideText("Belum tepat. Agar 1 Jus menjadi 2 Jus seperti pada Persamaan 1, kita harus mengalikannya dengan 2.");
+            }
+        }
+
+        function executeEliminateX() {
+            playSfx('success');
+            stepState.step3Eliminated = true;
+            renderStep(3);
+            setGuideText("Sempurna! 2 gelas jus dikurangi 2 gelas jus habis tereliminasi. 2 Nasi Goreng − 1 Nasi Goreng = 1 Nasi Goreng, dan 50.000 − 35.000 = Rp 15.000!");
+        }
+
+        function launchConfetti() {
+            const colors = ['#f59e0b', '#10b981', '#6366f1', '#ec4899', '#3b82f6'];
+            for (let i = 0; i < 45; i++) {
+                const conf = document.createElement('div');
+                conf.className = 'confetti rounded-sm';
+                conf.style.left = Math.random() * 100 + 'vw';
+                conf.style.backgroundColor = colors[Math.floor(Math.random() * colors.length)];
+                conf.style.animationDuration = (Math.random() * 2 + 2) + 's';
+                conf.style.animationDelay = (Math.random() * 0.5) + 's';
+                document.body.appendChild(conf);
+                setTimeout(() => conf.remove(), 4500);
+            }
+        }
+    </script>
+</body>
+</html>
